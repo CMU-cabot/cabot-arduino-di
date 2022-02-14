@@ -1,3 +1,5 @@
+#include <analogWrite.h>
+
 /*******************************************************************************
  * Copyright (c) 2020  Carnegie Mellon University
  *
@@ -47,7 +49,7 @@ Heartbeat(int led_pin, int delay):
 
   void update() {
     status_ = status_+1;
-    analogWrite(led_pin_, sin(6.28 * status_ * delay_ / 1000.0) * 127 + 127);
+    analogWrite(led_pin_, (int)(sin(6.28 * status_ * delay_ / 1000.0) * 127 + 127));
   }
 };
 
