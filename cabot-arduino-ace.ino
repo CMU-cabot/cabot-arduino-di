@@ -21,9 +21,9 @@
  *******************************************************************************/
 
 #ifdef ESP32
-//#undef ESP32
+#undef ESP32
 #include <ros.h>
-//#define ESP32
+#define ESP32
 #ifndef LED_BUILTIN
 #define LED_BUILTIN 2
 #endif
