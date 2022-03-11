@@ -32,18 +32,20 @@ BarometerReader::BarometerReader(ros::NodeHandle &nh):
 }
 
 void BarometerReader::init(){
-  if(!bmp_.begin())
+  Wire.begin(21,22);
+  if(!bmp_.begin(0x76, &Wire))
   {
-    nh_.loginfo("Ooops, no BMP280 detected ... Check your wiring or I2C ADDR!");
+    nh_.loginfo("Ooops, no BME280 detected ... Check your wiring or I2C ADDR!");
     return;
   }
   initialized_ = true;
   
-  bmp_.setSampling(Adafruit_BMP280::MODE_NORMAL,     /* Operating Mode. */
-		   Adafruit_BMP280::SAMPLING_X2,     /* Temp. oversampling */
-		   Adafruit_BMP280::SAMPLING_X16,    /* Pressure oversampling */
-		   Adafruit_BMP280::FILTER_X16,      /* Filtering. */
-		   Adafruit_BMP280::STANDBY_MS_500); /* Standby time. */
+  bmp_.setSampling(Adafruit_BME280::MODE_NORMAL,     /* Operating Mode. */
+		   Adafruit_BME280::SAMPLING_X2,     /* Temp. oversampling */
+		   Adafruit_BME280::SAMPLING_X16,    /* Pressure oversampling */
+       Adafruit_BME280::SAMPLING_X16, 
+		   Adafruit_BME280::FILTER_X16,      /* Filtering. */
+		   Adafruit_BME280::STANDBY_MS_500); /* Standby time. */
 }
 
 void BarometerReader::update(){
