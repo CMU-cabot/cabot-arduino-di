@@ -46,6 +46,9 @@ function build() {
 function upload() {
     echo "uploading..."
     arduino-cli upload -b $board -p $port .
+    while [ $? -ne 0 ]; do
+	arduino-cli upload -b $board -p $port .
+    done	
 }    
 
 if [ $target == "build" ]; then
