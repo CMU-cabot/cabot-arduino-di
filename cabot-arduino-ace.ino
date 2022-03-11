@@ -124,7 +124,7 @@ void setup()
   int calibration_params[22];
   uint8_t *offsets = NULL;
   if (nh.getParam("~calibration_params", calibration_params, 22, 500)) {
-    offsets = malloc(sizeof(uint8_t) * 22);
+    offsets = (uint8_t*) malloc(sizeof(uint8_t) * 22);
     for(int i = 0; i < 22; i++) {
       offsets[i] = calibration_params[i] & 0xFF;
     }
@@ -169,6 +169,8 @@ void setup()
   nh.loginfo(default_values);
 
   // initialize
+  //nh.loginfo("starting uart com");
+  //urt_cm.start();
   nh.loginfo("setting up BMP280");
   bmpReader.init();
   nh.loginfo("setting up Buttons");
@@ -181,6 +183,7 @@ void setup()
   vibratorController.init();
   nh.loginfo("setting up heartbeat");
   heartbeat.init();
+
   
   // wait sensors ready
   delay(100);

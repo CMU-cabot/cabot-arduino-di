@@ -25,13 +25,15 @@
 
 #include <Wire.h>
 #include <Adafruit_Sensor.h>
-#include <Adafruit_BMP280.h>
+//#include <Adafruit_BMP280.h>
+#include <Adafruit_BME280.h>
 #include <sensor_msgs/FluidPressure.h>
 #include <sensor_msgs/Temperature.h>
 #include "SensorReader.h"
 
 class BarometerReader : public SensorReader{
-  Adafruit_BMP280 bmp_;
+  //Adafruit_BMP280 bmp_;
+  Adafruit_BME280 bmp_;
   sensor_msgs::FluidPressure fp_msg_;
   sensor_msgs::Temperature tmp_msg_;
   ros::Publisher fp_pub_;
