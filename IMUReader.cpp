@@ -92,10 +92,11 @@ void IMUReader::update() {
 
   // publish
   imu_pub_.publish( &imu_msg_ );
+}
 
-  if (in_calibration_ == false) {
-    return;
-  }
+void IMUReader::update_calibration() {
+  if (!initialized_) {
+    return;                                                                                                                           }
 
   uint8_t *offsets = calibration_msg_.data;
   imu_.getSensorOffsets(offsets);
