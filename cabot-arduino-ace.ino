@@ -32,7 +32,7 @@
 #endif
 
 #include "Arduino.h"
-#include <Timer.h>
+#include <arduino-timer.h>
 
 #include "uart_com.h"
 #include "BarometerReader.h"
@@ -46,7 +46,7 @@
 #include "VibratorController_ace.h"
 
 ros::NodeHandle nh;
-Timer timer;
+Timer<10> timer;
 
 // configurations
 #define BAUDRATE (115200)
@@ -113,9 +113,10 @@ void setup()
   nh.getParam("~run_imu_calibration", &run_imu_calibration, 1, 500);
   if (run_imu_calibration != 0) {
     imuReader.calibration();
-    timer.every(100, [](){
+    timer.every(100, [](void*){
       imuReader.update();
       imuReader.update_calibration();
+      return true;
     });
     nh.loginfo("Calibration Mode started");
     return;
@@ -124,7 +125,7 @@ void setup()
   int calibration_params[22];
   uint8_t *offsets = NULL;
   if (nh.getParam("~calibration_params", calibration_params, 22, 500)) {
-    offsets = malloc(sizeof(uint8_t) * 22);
+    offsets = (uint8_t*)malloc(sizeof(uint8_t) * 22);
     for(int i = 0; i < 22; i++) {
       offsets[i] = calibration_params[i] & 0xFF;
     }
@@ -186,18 +187,21 @@ void setup()
   delay(100);
 
   // set timers
-  timer.every(500, [](){
+  timer.every(500, [](void*){
       bmpReader.update();
+      return true;
     });
 
-  timer.every(20, [](){
+  timer.every(20, [](void*){
       heartbeat.update();
       buttonsReader.update();
       touchReader.update();
+      return true;
     });
 
-  timer.every(10, [](){
+  timer.every(10, [](void*){
       imuReader.update();
+      return true;
     });
   
   nh.loginfo("Arduino is ready");
@@ -205,7 +209,7 @@ void setup()
 
 void loop()
 {
-  timer.update();
+  timer.tick<void>();
   urt_cm.update();
   nh.spinOnce();
 }
