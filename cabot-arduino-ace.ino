@@ -34,12 +34,16 @@
 #include "Arduino.h"
 #include <Timer.h>
 
+#include "uart_com.h"
 #include "BarometerReader.h"
-#include "ButtonsReader.h"
+//#include "ButtonsReader.h"
+#include "ButtonsReader_ace.h"
 #include "Heartbeat.h"
 #include "IMUReader.h"
-#include "TouchReader.h"
-#include "VibratorController.h"
+//#include "TouchReader.h"
+#include "TouchReader_ace.h"
+//#include "VibratorController.h"
+#include "VibratorController_ace.h"
 
 ros::NodeHandle nh;
 Timer timer;
@@ -78,14 +82,19 @@ Timer timer;
 #define TOUCH_THRESHOLD_DEFAULT (64)
 #define RELEASE_THRESHOLD_DEFAULT (24)
 
+uart_com urt_cm;
+
 // sensors
 BarometerReader bmpReader(nh);
-ButtonsReader buttonsReader(nh, BTN1_PIN, BTN2_PIN, BTN3_PIN, BTN4_PIN);
+//ButtonsReader buttonsReader(nh, BTN1_PIN, BTN2_PIN, BTN3_PIN, BTN4_PIN);
+ButtonsReader_ace buttonsReader(nh, urt_cm);
 IMUReader imuReader(nh);
-TouchReader touchReader(nh);
+//TouchReader touchReader(nh);
+TouchReader_ace touchReader(nh, urt_cm);
 
 // controllers
-VibratorController vibratorController(nh, VIB1_PIN, VIB2_PIN, VIB3_PIN, VIB4_PIN);
+//VibratorController vibratorController(nh, VIB1_PIN, VIB2_PIN, VIB3_PIN, VIB4_PIN);
+VibratorController_ace vibratorController(nh, urt_cm);
 Heartbeat heartbeat(LED_BUILTIN, HEARTBEAT_DELAY);
 
 
@@ -93,6 +102,7 @@ void setup()
 {
   // set baud rate
   nh.getHardware()->setBaud(BAUDRATE);
+  urt_cm.begin();
 
   // connect to rosserial
   nh.initNode();
@@ -188,5 +198,6 @@ void setup()
 void loop()
 {
   timer.update();
+  urt_cm.update();
   nh.spinOnce();
 }
