@@ -169,8 +169,8 @@ void setup()
   nh.loginfo(default_values);
 
   // initialize
-  //nh.loginfo("starting uart com");
-  //urt_cm.start();
+  nh.loginfo("starting uart com");
+  urt_cm.start();
   nh.loginfo("setting up BMP280");
   bmpReader.init();
   nh.loginfo("setting up Buttons");
@@ -194,7 +194,7 @@ void setup()
     });
 
   timer.every(20, [](){
-      heartbeat.update();
+      //heartbeat.update();
       buttonsReader.update();
       touchReader.update();
     });

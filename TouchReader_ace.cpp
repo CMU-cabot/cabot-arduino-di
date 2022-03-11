@@ -41,6 +41,8 @@ void TouchReader_ace::init() {
 
 void TouchReader_ace::init(uint8_t touch_baseline, uint8_t touch_threshold, uint8_t release_threshold) {
   //cm.set_thresh(touch_threshold);
+  nh_.loginfo("Touch initialized");
+  initialized_ = true;
 }
 
 void TouchReader_ace::set_mode(uint8_t touch_baseline) {
