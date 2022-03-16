@@ -40,7 +40,23 @@ One example of hardware components
 - Conductive Material (ex. [Copper foil tape](https://www.adafruit.com/product/3483))
 - Wires and headers
 
-### Software
+### Software (docker, arduino-ide)
+
+```
+  host $ docker-compose build
+  host $ docker-compose run arduino
+docker $ ./build.sh all                # build and upload (with -b esp32:esp32:esp32 -p /dev/ttyESP32)
+                                       # you can set board by ARDUINO_BOARD, and port by ARDUINO_PORT environment variables
+
+or use arduino-cli
+docker $ arduino-cli compile -b esp32:esp32:esp32 .
+docker $ arduino-cli upload -b esp32:esp32:esp32 -p /dev/ttyESP32 .
+```
+- change `-b <board type> -p <port>` for your environment
+- linux is required to upload built sketch (Windows/Mac docker container does not support)
+
+
+### Software (Arduino IDE)
 
 In order to run ROS on Arduino Mega 2560, you will need both the Arduino IDE as well as ROS Serial Arduino Library. Please follow the instructions on the following page for installing these requirements:
 [Installation instructions](http://wiki.ros.org/rosserial_arduino/Tutorials/Arduino%20IDE%20Setup)
@@ -55,7 +71,7 @@ git clone https://github.com/adafruit/Adafruit_Sensor.git
 git clone https://github.com/adafruit/Adafruit_ADXL343.git
 git clone https://github.com/adafruit/Adafruit_MPR121.git
 git clone https://github.com/adafruit/Adafruit_BMP280.git
-git clone https://github.com/JChristensen/Timer.git
+git clone https://github.com/contrem/arduino-timer
 git clone https://github.com/frankjoshua/rosserial_arduino_lib.git
 rosrun rosserial_arduino make_libraries.py ~/Arduino
 ```
