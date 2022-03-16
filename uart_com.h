@@ -56,7 +56,7 @@ class uart_com{
     int switch_right;
     int switch_center;
     uart_com();
-    void begin(int baud_rate = 115200);
+    void begin(int baud_rate = 38400);
     void update();
     void start();
     void stop();
