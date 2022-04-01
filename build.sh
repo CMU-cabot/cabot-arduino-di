@@ -25,13 +25,15 @@ while getopts "hb:p:" arg; do
 	    exit
 	    ;;
 	b)
-	    borad=$OPTARG
+	    board=$OPTARG
 	    ;;
 	p)
 	    port=$OPTARG
 	    ;;
     esac
 done
+shift $((OPTIND-1))
+
 
 target=$1
 if [ -z $target ]; then
@@ -39,12 +41,12 @@ if [ -z $target ]; then
 fi
 
 function build() {
-    echo "building..."
+    echo "building for $board..."
     arduino-cli compile -b $board .
 }
 
 function upload() {
-    echo "uploading..."
+    echo "uploading for $board at $port..."
     arduino-cli upload -b $board -p $port .
     while [ $? -ne 0 ]; do
 	arduino-cli upload -b $board -p $port .

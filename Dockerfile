@@ -6,7 +6,7 @@ RUN arduino-cli core update-index --config-file arduino-cli.yaml
 RUN arduino-cli core install esp32:esp32
 RUN arduino-cli lib install "Rosserial Arduino Library"@0.9.1
 RUN arduino-cli lib install "Adafruit BNO055"
-RUN arduino-cli lib install "Adafruit BMP280 Library"
+RUN arduino-cli lib install "Adafruit BME280 Library"
 RUN arduino-cli lib install "Adafruit MPR121"
 RUN arduino-cli lib install "arduino-timer"
 RUN arduino-cli lib install "ESP32 AnalogWrite"
