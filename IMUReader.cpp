@@ -53,6 +53,8 @@ void IMUReader::init(uint8_t *offsets) {
     imu_.setSensorOffsets(offsets);
   }
   imu_.setExtCrystalUse(true);
+  imu_.setAxisRemap(Adafruit_BNO055::REMAP_CONFIG_P7);
+  imu_.setAxisSign(Adafruit_BNO055::REMAP_SIGN_P7);
 
   // time 2 + orientation 4 + angular_velocy 3 + linear_acceleration 3
   imu_msg_.data = (float*)malloc(sizeof(float)*12);
