@@ -19,12 +19,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  *******************************************************************************/
+#include <std_msgs/UInt32.h>
+#include "SensorReader.h"
 #ifndef uart_com_h
 #define uart_com_h
 #define CMD_BUF_MAX (128)
 #define MAX_LEN  64
 
-class uart_com{
+class uart_com: SensorReader{
   private:
   //for parsing
     char CmdBuf[CMD_BUF_MAX]; //command buffer
@@ -38,10 +40,17 @@ class uart_com{
     unsigned long _last_update_millis = 0;
     bool _started = false;
     bool parse_mot();
+    bool parse_mot_r();
+    bool parse_mot_c();
+    bool parse_mot_l();
     bool parse_thresh();
     bool parse_sensi();
     bool parse_dat();
+    bool parse_dat_short();
+    bool parse_error();
     void StringCmdParse(char c);
+    std_msgs::UInt32 error_msg_;
+    ros::Publisher error_pub_;
   public:
     bool touch;
     int capacitance;
@@ -55,9 +64,11 @@ class uart_com{
     int switch_left;
     int switch_right;
     int switch_center;
-    uart_com();
-    void begin(int baud_rate = 38400);
+    int error_count;
+    uart_com(ros::NodeHandle &nh);
+    void init();
     void update();
+    void begin(int baud_rate = 38400);
     void start();
     void stop();
     bool is_started();
@@ -68,6 +79,7 @@ class uart_com{
     bool set_mot_l(int val);
     bool set_thresh(int thresh);
     bool set_sensi(int sensi);
+    void publish();
 };
 
 #endif

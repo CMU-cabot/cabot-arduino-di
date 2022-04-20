@@ -50,8 +50,10 @@ unsigned short DecStringToDec(char * str){
   }
 }
 
-uart_com::uart_com(){
-  
+uart_com::uart_com(ros::NodeHandle &nh):
+    SensorReader(nh),
+    error_pub_("error_count", &error_msg_) {
+  nh.advertise(error_pub_);
 }
 
 void uart_com::begin(int baud_rate){
@@ -71,6 +73,37 @@ bool uart_com::parse_mot(){
     return false;
   }
 }
+
+bool uart_com::parse_mot_r(){
+  if(2 == words_len
+  && IsDecString(words[1])) {
+    this->motor_r = DecStringToDec(words[1]);
+    return true;
+  }else{
+    return false;
+  }
+}
+
+bool uart_com::parse_mot_c(){
+  if(2 == words_len
+  && IsDecString(words[1])) {
+    this->motor_c = DecStringToDec(words[1]);
+    return true;
+  }else{
+    return false;
+  }
+}
+
+bool uart_com::parse_mot_l(){
+  if(2 == words_len
+  && IsDecString(words[1])) {
+    this->motor_l = DecStringToDec(words[1]);
+    return true;
+  }else{
+    return false;
+  }
+}
+
 bool uart_com::parse_thresh(){
   if(2 == words_len
   && IsDecString(words[1])){
@@ -119,6 +152,33 @@ bool uart_com::parse_dat(){
   return true;
 }
 
+bool uart_com::parse_dat_short(){
+  if(words_len != 8)return false;
+  if(!IsDecString(words[1]))return false;
+  if(!IsDecString(words[2]))return false;
+  if(!IsDecString(words[3]))return false;
+  if(!IsDecString(words[4]))return false;
+  if(!IsDecString(words[5]))return false;
+  if(!IsDecString(words[6]))return false;
+  if(!IsDecString(words[7]))return false;
+
+  this->touch =DecStringToDec(words[1]);
+  this->capacitance =DecStringToDec(words[2]);
+  this->switch_up =DecStringToDec(words[3]);
+  this->switch_down =DecStringToDec(words[4]);
+  this->switch_left =DecStringToDec(words[5]);
+  this->switch_right =DecStringToDec(words[6]);
+  this->switch_center =DecStringToDec(words[7]);
+
+  return true;
+}
+
+bool uart_com::parse_error(){
+  if(words_len != 2)return false;
+  if(!IsDecString(words[1]))return false;
+  this->error_count += DecStringToDec(words[1]);
+}
+
 void uart_com::StringCmdParse(char c){
   CMD_PARSE_FLAG =true;
 
@@ -163,16 +223,28 @@ void uart_com::StringCmdParse(char c){
       if(this->parse_dat()){
         _last_update_millis = millis();
       }
+    }else if(strcmp(words[0] ,"D") ==0){
+      if(this->parse_dat_short()){
+        _last_update_millis = millis();
+      }
     }else if(strcmp(words[0] ,"start") ==0){
       this->_started = true;
     }else if(strcmp(words[0] ,"stop") ==0){
       this->_started = false;
     }else if(strcmp(words[0] ,"MOT") ==0){
       this->parse_mot();
+    }else if(strcmp(words[0] ,"R") ==0){
+      this->parse_mot_r();
+    }else if(strcmp(words[0] ,"C") ==0){
+      this->parse_mot_c();
+    }else if(strcmp(words[0] ,"L") ==0){
+      this->parse_mot_l();
     }else if(strcmp(words[0] ,"THRESH") ==0){
       this->parse_thresh();
     }else if(strcmp(words[0] ,"SENSI") ==0){
       this->parse_sensi();
+    }else if(strcmp(words[0] ,"E")==0){
+      this->parse_error();
     }else if(strcmp(words[0] ,"") ==0){
     }else{
       //other_func();nop just handle error if any.
@@ -182,6 +254,9 @@ void uart_com::StringCmdParse(char c){
     memset(CmdBuf,0,sizeof(CmdBuf));
   }
   CMD_PARSE_FLAG=false;
+}
+
+void uart_com::init(){
 }
 
 void uart_com::update(){
@@ -211,14 +286,37 @@ bool uart_com::set_mot(int right, int center, int left){
   }
 }
 
-bool uart_com::set_mot_r(int val){//TBR//check is_alive
-  return set_mot(val, motor_c, motor_l);
+bool uart_com::set_mot_r(int val){
+  if(100 >= val) {
+    String buf="R,";
+    buf += String(val);
+    UART.println(buf);
+    return true;
+  }else{
+    return false;
+  }
 }
+
 bool uart_com::set_mot_c(int val){
-  return set_mot(motor_r, val, motor_l);
+  if(100 >= val) {
+    String buf="C,";
+    buf += String(val);
+    UART.println(buf);
+    return true;
+  }else{
+    return false;
+  }
 }
+
 bool uart_com::set_mot_l(int val){
-  return set_mot(motor_r, motor_c, val);
+  if(100 >= val) {
+    String buf="L,";
+    buf += String(val);
+    UART.println(buf);
+    return true;
+  }else{
+    return false;
+  }
 }
 
 bool uart_com::set_thresh(int thresh){
@@ -257,4 +355,9 @@ bool uart_com::is_started(){
 bool uart_com::is_alive(){
   unsigned long cur = millis();
   return ((cur - this->_last_update_millis) < 1000);
+}
+
+void uart_com::publish() {
+  error_msg_.data = error_count;
+  error_pub_.publish(&error_msg_);
 }

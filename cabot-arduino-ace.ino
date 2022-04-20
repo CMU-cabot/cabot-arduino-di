@@ -82,7 +82,7 @@ Timer<10> timer;
 #define TOUCH_THRESHOLD_DEFAULT (64)
 #define RELEASE_THRESHOLD_DEFAULT (24)
 
-uart_com urt_cm;
+uart_com urt_cm(nh);
 
 // sensors
 BarometerReader bmpReader(nh);
@@ -102,7 +102,7 @@ void setup()
 {
   // set baud rate
   nh.getHardware()->setBaud(BAUDRATE);
-  urt_cm.begin();
+  urt_cm.begin(19200);
 
   // connect to rosserial
   nh.initNode();
@@ -192,6 +192,7 @@ void setup()
   // set timers
   timer.every(500, [](void*){
       bmpReader.update();
+      urt_cm.publish();
       return true;
     });
 
