@@ -176,7 +176,10 @@ bool uart_com::parse_dat_short(){
 bool uart_com::parse_error(){
   if(words_len != 2)return false;
   if(!IsDecString(words[1]))return false;
-  this->error_count += DecStringToDec(words[1]);
+  int code=DecStringToDec(words[1]);
+
+  // ORE, NE, FE, PE
+  this->error_count += ((code >> 3) % 2 * 1000000) + ((code >> 2) % 2 * 10000) + ((code >> 1) % 2 * 100) + code % 2;
 }
 
 void uart_com::StringCmdParse(char c){

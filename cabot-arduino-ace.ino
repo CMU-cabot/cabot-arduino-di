@@ -102,7 +102,7 @@ void setup()
 {
   // set baud rate
   nh.getHardware()->setBaud(BAUDRATE);
-  urt_cm.begin(19200);
+  urt_cm.begin(9600);
 
   // connect to rosserial
   nh.initNode();
