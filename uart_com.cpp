@@ -173,6 +173,23 @@ bool uart_com::parse_dat_short(){
   return true;
 }
 
+bool uart_com::parse_dat_shortest(){
+  if(words_len != 3)return false;
+  if(!IsDecString(words[1]))return false;
+  if(!IsDecString(words[2]))return false;
+
+  int code = DecStringToDec(words[1]);
+  this->touch = (code >> 5) % 2;
+  this->capacitance =DecStringToDec(words[2]);
+  this->switch_up = (code >> 4) % 2;
+  this->switch_down = (code >> 3) % 2;
+  this->switch_left = (code >> 2) % 2;
+  this->switch_right = (code >> 1) % 2;
+  this->switch_center = (code >> 0) % 2;
+
+  return true;
+}
+
 bool uart_com::parse_error(){
   if(words_len != 2)return false;
   if(!IsDecString(words[1]))return false;
@@ -228,6 +245,10 @@ void uart_com::StringCmdParse(char c){
       }
     }else if(strcmp(words[0] ,"D") ==0){
       if(this->parse_dat_short()){
+        _last_update_millis = millis();
+      }
+    }else if(strcmp(words[0] ,"d") ==0){
+      if(this->parse_dat_shortest()){
         _last_update_millis = millis();
       }
     }else if(strcmp(words[0] ,"start") ==0){
