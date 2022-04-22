@@ -47,6 +47,7 @@ class uart_com: SensorReader{
     bool parse_sensi();
     bool parse_dat();
     bool parse_dat_short();
+    bool parse_dat_shortest();
     bool parse_error();
     void StringCmdParse(char c);
     std_msgs::UInt32 error_msg_;
