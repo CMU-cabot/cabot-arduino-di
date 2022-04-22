@@ -312,7 +312,7 @@ bool uart_com::set_mot(int right, int center, int left){
 
 bool uart_com::set_mot_r(int val){
   if(100 >= val) {
-    if (this->motor_r == val) return true;
+    //if (this->motor_r == val) return true;
     String buf="R,";
     buf += String(val);
     UART.println(buf);
@@ -324,7 +324,7 @@ bool uart_com::set_mot_r(int val){
 
 bool uart_com::set_mot_c(int val){
   if(100 >= val) {
-    if (this->motor_c == val) return true;
+    //if (this->motor_c == val) return true;
     String buf="C,";
     buf += String(val);
     UART.println(buf);
@@ -336,7 +336,7 @@ bool uart_com::set_mot_c(int val){
 
 bool uart_com::set_mot_l(int val){
   if(100 >= val) {
-    if (this->motor_l == val) return true;
+    //if (this->motor_l == val) return true;
     String buf="L,";
     buf += String(val);
     UART.println(buf);
