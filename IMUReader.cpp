@@ -52,8 +52,8 @@ void IMUReader::init(uint8_t *offsets) {
   if (offsets != NULL) {
     imu_.setSensorOffsets(offsets);
   }
-  imu_.setAxisRemap(Adafruit_BNO055::REMAP_CONFIG_P7);
-  imu_.setAxisSign(Adafruit_BNO055::REMAP_SIGN_P7);
+  imu_.setAxisRemap(Adafruit_BNO055::REMAP_CONFIG_P6);
+  imu_.setAxisSign(Adafruit_BNO055::REMAP_SIGN_P6);
 
   imu_.setExtCrystalUse(true); // set crystal AFTER setting sensor parameters
 
