@@ -143,7 +143,7 @@ void setup()
   }
   nh.loginfo("setting up WiFi");
   wifiReader.init([](char *buf){
-    nh.loginfo(buf);//TODO*
+    //nh.loginfo(buf);//TODO*
   });
 
   int touch_params[3];
