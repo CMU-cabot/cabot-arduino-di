@@ -40,6 +40,7 @@
 #include "ButtonsReader_ace.h"
 #include "Heartbeat.h"
 #include "IMUReader.h"
+#include "WiFiReader.h"
 //#include "TouchReader.h"
 #include "TouchReader_ace.h"
 //#include "VibratorController.h"
@@ -89,6 +90,7 @@ BarometerReader bmpReader(nh);
 //ButtonsReader buttonsReader(nh, BTN1_PIN, BTN2_PIN, BTN3_PIN, BTN4_PIN);
 ButtonsReader_ace buttonsReader(nh, urt_cm);
 IMUReader imuReader(nh);
+WiFiReader wifiReader(nh);
 //TouchReader touchReader(nh);
 TouchReader_ace touchReader(nh, urt_cm);
 
@@ -139,6 +141,10 @@ void setup()
     nh.logwarn("Visit the following link to check how to calibrate sensoe");
     nh.logwarn("https://learn.adafruit.com/adafruit-bno055-absolute-orientation-sensor/device-calibration");
   }
+  nh.loginfo("setting up WiFi");
+  wifiReader.init([](char *buf){
+    nh.loginfo(buf);//TODO*
+  });
 
   int touch_params[3];
   int touch_baseline;
@@ -215,5 +221,11 @@ void loop()
 {
   timer.tick<void>();
   urt_cm.update();
+  wifiReader.update();
   nh.spinOnce();
+}
+
+void restart()
+{
+  ESP.restart();
 }
