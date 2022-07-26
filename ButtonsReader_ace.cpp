@@ -29,17 +29,19 @@
 ButtonsReader_ace::ButtonsReader_ace(ros::NodeHandle &nh, uart_com& cm):
   SensorReader(nh),
   cm(cm),
-  b1_pub_("pushed_1", &b1_msg_),
+  /*b1_pub_("pushed_1", &b1_msg_),
   b2_pub_("pushed_2", &b2_msg_),
   b3_pub_("pushed_3", &b3_msg_),
   b4_pub_("pushed_4", &b4_msg_),
-  b5_pub_("pushed_5", &b5_msg_)
+  b5_pub_("pushed_5", &b5_msg_)*/
+  b_pub_("pushed", &b_msg_)
 {
-  nh.advertise(b1_pub_);
+  /*nh.advertise(b1_pub_);
   nh.advertise(b2_pub_);
   nh.advertise(b3_pub_);
   nh.advertise(b4_pub_);
-  nh.advertise(b5_pub_);
+  nh.advertise(b5_pub_);*/
+  nh.advertise(b_pub_);
 }
 
 void ButtonsReader_ace::init(){
@@ -65,15 +67,17 @@ void ButtonsReader_ace::update() {
     reading_5 = reading_5 && cm.switch_center;
   }*/
   
-  b1_msg_.data = reading_1;
+  /*b1_msg_.data = reading_1;
   b2_msg_.data = reading_2;
   b3_msg_.data = reading_3;
   b4_msg_.data = reading_4;
-  b5_msg_.data = reading_5;
+  b5_msg_.data = reading_5;*/
+  b_msg_.data = reading_1 ? 0x01 : 0x00 | reading_2 ? 0x02 : 0x00 | reading_3 ? 0x04 : 0x00 | reading_4 ? 0x08 : 0x00 | reading_5 ? 0x10 : 0x00;
         
-  b1_pub_.publish(&b1_msg_);
+  /*b1_pub_.publish(&b1_msg_);
   b2_pub_.publish(&b2_msg_);  
   b3_pub_.publish(&b3_msg_);
   b4_pub_.publish(&b4_msg_); 
-  b5_pub_.publish(&b5_msg_);
+  b5_pub_.publish(&b5_msg_);*/
+  b_pub_.publish(&b_msg_);
 }

@@ -25,20 +25,23 @@
 
 #include <Wire.h>
 #include <std_msgs/Bool.h>
+#include <std_msgs/Int8.h>
 #include "SensorReader.h"
 #include "uart_com.h"
 
 class ButtonsReader_ace: public SensorReader {
-  ros::Publisher b1_pub_;
+  /*ros::Publisher b1_pub_;
   ros::Publisher b2_pub_;
   ros::Publisher b3_pub_;
   ros::Publisher b4_pub_;
-  ros::Publisher b5_pub_;
-  std_msgs::Bool b1_msg_;
+  ros::Publisher b5_pub_;*/
+  ros::Publisher b_pub_;
+  /*std_msgs::Bool b1_msg_;
   std_msgs::Bool b2_msg_;
   std_msgs::Bool b3_msg_;
   std_msgs::Bool b4_msg_;
-  std_msgs::Bool b5_msg_;
+  std_msgs::Bool b5_msg_;*/
+  std_msgs::Int8 b_msg_;
   uart_com& cm;
 public:
   ButtonsReader_ace(ros::NodeHandle &nh, uart_com& cm);

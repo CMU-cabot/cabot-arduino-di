@@ -26,12 +26,12 @@ TouchReader_ace::TouchReader_ace(ros::NodeHandle &nh, uart_com& cm):
   SensorReader(nh),
   cm(cm),
   touch_pub_("touch", &touch_msg_),
-  raw_pub_("touch_raw", &raw_msg_),
-  vel_pub_("touch_speed", &vel_msg_)
+  raw_pub_("touch_raw", &raw_msg_)/*,
+  vel_pub_("touch_speed", &vel_msg_)*/
 {
   nh.advertise(touch_pub_);
   nh.advertise(raw_pub_);
-  nh.advertise(vel_pub_);
+  //nh.advertise(vel_pub_);
 }
 
 void TouchReader_ace::init() {
@@ -60,6 +60,6 @@ void TouchReader_ace::update() {
   raw_msg_.data = cm.capacitance;//TBR
   raw_pub_.publish( &raw_msg_ );
   
-  vel_msg_.data = (touched & 0x01) ? 2.0 : 0;
-  vel_pub_.publish( &vel_msg_ );
+  //vel_msg_.data = (touched & 0x01) ? 2.0 : 0;
+  //vel_pub_.publish( &vel_msg_ );
 }
