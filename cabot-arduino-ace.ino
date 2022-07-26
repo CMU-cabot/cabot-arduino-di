@@ -213,6 +213,10 @@ void setup()
       imuReader.update();
       return true;
     });
+  timer.every(20, [](void*){
+    wifiReader.update();
+    return true;
+  });
   
   nh.loginfo("Arduino is ready");
 }
@@ -221,7 +225,6 @@ void loop()
 {
   timer.tick<void>();
   urt_cm.update();
-  wifiReader.update();
   nh.spinOnce();
 }
 
