@@ -52,20 +52,11 @@ void ButtonsReader_ace::init(){
 }
 
 void ButtonsReader_ace::update() {
-  bool reading_1 = cm.switch_up;//!digitalRead(b1_pin_);
-  bool reading_2 = cm.switch_down;//!digitalRead(b2_pin_);
-  bool reading_3 = cm.switch_left;//!digitalRead(b3_pin_);
-  bool reading_4 = cm.switch_right;//!digitalRead(b4_pin_);
+  bool reading_1 = cm.switch_up;
+  bool reading_2 = cm.switch_down;
+  bool reading_3 = cm.switch_left;
+  bool reading_4 = cm.switch_right;
   bool reading_5 = cm.switch_center;
-
-  /*for(int i = 0; i < 10; i++) {
-    delayMicroseconds(10);
-    reading_1 = reading_1 && cm.switch_up;//!digitalRead(b1_pin_);
-    reading_2 = reading_2 && cm.switch_down;//!digitalRead(b2_pin_);
-    reading_3 = reading_3 && cm.switch_left;//!digitalRead(b3_pin_);  
-    reading_4 = reading_4 && cm.switch_right;//!digitalRead(b4_pin_);
-    reading_5 = reading_5 && cm.switch_center;
-  }*/
   
   /*b1_msg_.data = reading_1;
   b2_msg_.data = reading_2;
