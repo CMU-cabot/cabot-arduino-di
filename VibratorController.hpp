@@ -19,66 +19,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  *******************************************************************************/
+
+#ifndef VIBRATORCONTROLLER_HPP_
+#define VIBRATORCONTROLLER_HPP_
+
+#include <Wire.h>
 #include "SensorReader.h"
-#ifndef UART_COM_H_
-#define UART_COM_H_
-#define CMD_BUF_MAX (128)
-#define MAX_LEN  64
+#ifdef ESP32
+#include <analogWrite.h>
+#endif
+#include "uart_com.h"  // NOLINT
 
-class uart_com: SensorReader {
-private:
-  // for parsing
-  char CmdBuf[CMD_BUF_MAX];  // command buffer
-  int CmdBuf_wp = 0;  // Number of stored in command buffer
-  char * words[MAX_LEN];
-  int words_len = 0;
-  char * delim = ",";
-  bool CMD_PARSE_FLAG = false;
-  bool StartFlg = false;
-
-  uint32_t _last_update_millis = 0;
-  bool _started = false;
-  bool parse_mot();
-  bool parse_mot_r();
-  bool parse_mot_c();
-  bool parse_mot_l();
-  bool parse_thresh();
-  bool parse_sensi();
-  bool parse_dat();
-  bool parse_dat_short();
-  bool parse_dat_shortest();
-  bool parse_error();
-  void StringCmdParse(char c);
+class VibratorController: public SensorReader {
+  uart_com & cm;
 
 public:
-  bool touch;
-  int capacitance;
-  int cap_thresh;
-  int sensi = 2;
-  int motor_r;
-  int motor_c;
-  int motor_l;
-  int switch_up;
-  int switch_down;
-  int switch_left;
-  int switch_right;
-  int switch_center;
-  int error_count;
-  explicit uart_com(cabot::Handle & ch);
+  VibratorController(cabot::Handle & ch, uart_com & cm);
   void init();
   void update();
-  void begin(int baud_rate = 38400);
-  void start();
-  void stop();
-  bool is_started();
-  bool is_alive();
-  bool set_mot(int right, int center, int left);
-  bool set_mot_r(int val);
-  bool set_mot_c(int val);
-  bool set_mot_l(int val);
-  bool set_thresh(int thresh);
-  bool set_sensi(int sensi);
-  void publish();
 };
 
-#endif  // UART_COM_H_
+#endif  // VIBRATORCONTROLLER_HPP_

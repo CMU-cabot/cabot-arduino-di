@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2022 Carnegie Mellon University, IBM Corporation, and others
+ * Copyright (c) 2020, 2023  Carnegie Mellon University, IBM Corporation, and others
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,46 +20,40 @@
  * THE SOFTWARE.
  *******************************************************************************/
 
-#include "TouchReader_ace.h"
+#include "TouchReader.hpp"
 
-TouchReader_ace::TouchReader_ace(ros::NodeHandle &nh, uart_com& cm):
-  SensorReader(nh),
-  cm(cm),
-  touch_pub_("touch", &touch_msg_),
-  raw_pub_("touch_raw", &raw_msg_)/*,
-  vel_pub_("touch_speed", &vel_msg_)*/
+TouchReader::TouchReader(cabot::Handle & ch, uart_com & cm)
+: SensorReader(ch), cm(cm) {}
+
+void TouchReader::init()
 {
-  nh.advertise(touch_pub_);
-  nh.advertise(raw_pub_);
-  //nh.advertise(vel_pub_);
-}
-
-void TouchReader_ace::init() {
-  //TODO
   initialized_ = true;
 }
 
-void TouchReader_ace::init(uint8_t touch_baseline, uint8_t touch_threshold, uint8_t release_threshold) {
-  //cm.set_thresh(touch_threshold);
-  nh_.loginfo("Touch initialized");
+void TouchReader::init(
+  uint8_t touch_baseline, uint8_t touch_threshold,
+  uint8_t release_threshold)
+{
+  ch_.loginfo("Touch initialized");
   initialized_ = true;
 }
 
-void TouchReader_ace::set_mode(uint8_t touch_baseline) {
-  nh_.loginfo("Touch ready");
+void TouchReader::set_mode(uint8_t touch_baseline)
+{
+  ch_.loginfo("Touch ready");
 }
 
-void TouchReader_ace::update() {
+void TouchReader::update()
+{
   if (!initialized_) {
     return;
   }
   int touched = cm.touch ? 1 : 0;
-  touch_msg_.data = touched;
-  touch_pub_.publish( &touch_msg_ );
-  
-  raw_msg_.data = cm.capacitance;//TBR
-  raw_pub_.publish( &raw_msg_ );
-  
-  //vel_msg_.data = (touched & 0x01) ? 2.0 : 0;
-  //vel_pub_.publish( &vel_msg_ );
+
+  // touch
+  ch_.publish(0x10, (int16_t)touched);
+  // TBR
+  ch_.publish(0x11, (int16_t)cm.capacitance);
+  // vel
+  // ch_.publish(0x01, (int16_t)(touched & 0x01) ? 2.0 : 0);
 }

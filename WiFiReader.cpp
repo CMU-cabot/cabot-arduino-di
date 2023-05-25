@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2022  Carnegie Mellon University
+ * Copyright (c) 2020, 2023  Carnegie Mellon University and Miraikan
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,39 +20,40 @@
  * THE SOFTWARE.
  *******************************************************************************/
 
-#include "WiFiReader.h"
+#include "WiFiReader.hpp"
+#include <algorithm>
 
 extern void restart();
 
-WiFiReader::WiFiReader(ros::NodeHandle &nh):
-  SensorReader(nh),
-  wifi_scan_pub_("wifi_scan_str", &wifi_scan_msg_)
+WiFiReader::WiFiReader(cabot::Handle & ch)
+: SensorReader(ch)
 {
   WiFi.mode(WIFI_STA);
   WiFi.disconnect();
-  nh_.advertise(wifi_scan_pub_);
 }
 
-void WiFiReader::init(void (*callback)(char*)) {
+void WiFiReader::init(void (* callback)(char *))
+{
   callback_ = callback;
   init();
 }
 
-void WiFiReader::init() {
-
-  if (!nh_.getParam("~verbose", &verbose, 1, PARAM_TIMEOUT)) {
+void WiFiReader::init()
+{
+  verbose_int = verbose;
+  if (!ch_.getParam("~verbose", &verbose_int, 1, PARAM_TIMEOUT)) {
     verbose = DEFAULT_VERBOSITY;
   }
-  if (!nh_.getParam("~max_skip", &max_skip, 1, PARAM_TIMEOUT)) {
+  if (!ch_.getParam("~max_skip", &max_skip, 1, PARAM_TIMEOUT)) {
     max_skip = DEFAULT_MAX_SKIP;
   }
-  if (!nh_.getParam("~n_channel", &n_channel, 1, PARAM_TIMEOUT)) {
+  if (!ch_.getParam("~n_channel", &n_channel, 1, PARAM_TIMEOUT)) {
     n_channel = DEFAULT_N_CHANNEL;
   }
-  if (!nh_.getParam("~scan_duration", &scan_duration, 1, PARAM_TIMEOUT)) {
+  if (!ch_.getParam("~scan_duration", &scan_duration, 1, PARAM_TIMEOUT)) {
     scan_duration = DEFAULT_SCAN_DURATION;
   }
-  if (!nh_.getParam("~scan_interval", &scan_interval, 1, PARAM_TIMEOUT)) {
+  if (!ch_.getParam("~scan_interval", &scan_interval, 1, PARAM_TIMEOUT)) {
     scan_interval = DEFAULT_SCAN_INTERVAL;
   }
 
@@ -66,19 +67,17 @@ void WiFiReader::init() {
 
 void WiFiReader::showScanStatus()
 {
-  sprintf(buf, "WiFi: ");
+  snprintf(buf, buf[256], "%c", "WiFi: ");
   for (int i = 0; i < n_channel; i++) {
-    sprintf(buf+strlen(buf), "%2d|", aps[i]);
+    snprintf(buf + strlen(buf), buf[256], "%2d|", aps[i]);
   }
-  //sprintf(buf+strlen(buf), "%2d", channel+1);
-  //sprintf(buf+strlen(buf), "%s", nh_.connected()?"*":"-");
-  //sprintf(buf+strlen(buf), ",%s", isScanning?"*":"-");
-  sprintf(buf+strlen(buf), "%2d|", all_zero_count);
+  snprintf(buf + strlen(buf), buf[256], "%2d|", all_zero_count);
 
   callback_(buf);
 }
 
-void WiFiReader::update() {
+void WiFiReader::update()
+{
   handleScan();
 }
 
@@ -90,12 +89,11 @@ void WiFiReader::update() {
 void WiFiReader::handleScan()
 {
   if (isScanning == false) {
-    if (!nh_.connected()) {
+    if (!ch_.connected()) {
       restart();
     }
-    // TODO
-    // not sure why, but when the serial is disconnected
-    // sometimes it can be a strange state that nh.connected() == true and WiFi Scan does not work
+    // TODO(where writer): not sure why, but when the serial is disconnected
+    // sometimes it can be a strange state that ch.connected() == true and WiFi Scan does not work
     // restart the hardware if the WiFi scan returns no result for 10 consequtive cycles
     if (channel == 0) {
       checkZeroScan(10);
@@ -110,53 +108,50 @@ void WiFiReader::handleScan()
       // start scan for the current channcel
       //
       // definition
-      // int16_t scanNetworks(bool async = false,
-      //                      bool show_hidden = false,
-      //                      bool passive = false,
-      //                      uint32_t max_ms_per_chan = 300,
-      //                      uint8_t channel = 0);
-      int n = WiFi.scanNetworks(true, false, false, scan_duration, channel+1);
+      int n = WiFi.scanNetworks(true, false, false, scan_duration, channel + 1);
       scanningStart = millis();
       count[channel] = 0;
       isScanning = true;
-      //showScanStatus();
+      // showScanStatus();
     } else {
       // skip until skip count
       count[channel] += 1;
-      channel = (channel+1)%n_channel;
+      channel = (channel + 1) % n_channel;
     }
-  }
-  else {
+  } else {
     int n = 0;
     if ((n = WiFi.scanComplete()) >= 0) {
       // scan completed
       aps[channel] = n;
       showScanStatus();
       if (verbose) {
-  sprintf(buf, "[ch:%2d][%3dAPs][skip:%2d/%2d]%3dms,%5dms",
-    channel+1, n, skip[channel], max_skip,
-    millis()-scanningStart, millis()-lastseen[channel]);
-  //nh_.loginfo(buf);
+        snprintf(
+          buf, buf[256], "[ch:%2d][%3dAPs][skip:%2d/%2d]%3dms,%5dms",
+          channel + 1, n, skip[channel], max_skip,
+          millis() - scanningStart, millis() - lastseen[channel]);
+        // ch_.loginfo(buf);
       }
       lastseen[channel] = millis();
-      scanningStart = millis()+scan_interval;
+      scanningStart = millis() + scan_interval;
 
       if (n == 0) {
-  // increments skip count if no AP is found at the current channel
-        skip[channel] = min(skip[channel]+1, max_skip);
+        // increments skip count if no AP is found at the current channel
+        skip[channel] = min(skip[channel] + 1, max_skip);
       } else {
-  // if APs are found, put string into the queue
+        // if APs are found, put string into the queue
         skip[channel] = 0;
         for (int i = 0; i < n && waiting < MAX_WAITING; ++i) {
           String name = WiFi.SSID(i);
-          name.replace(","," ");
-          sprintf(msg_buf[waiting], "%s,%s,%d,%d,%d,%d", WiFi.BSSIDstr(i).c_str(), name.c_str(),
-                  WiFi.channel(i), WiFi.RSSI(i), nh_.now().sec, nh_.now().nsec);
-    waiting++;
+          name.replace(",", " ");
+          snprintf(
+            msg_buf[waiting], msg_buf[MAX_WAITING][100], "%s,%s,%d,%d,%d,%d",
+            WiFi.BSSIDstr(i).c_str(), name.c_str(), WiFi.channel(i),
+            WiFi.RSSI(i), ch_.now().sec, ch_.now().nsec);
+          waiting++;
         }
       }
 
-      channel = (channel+1) % n_channel;
+      channel = (channel + 1) % n_channel;
       isScanning = false;
     } else {
       // waiting scan result
@@ -169,15 +164,15 @@ void WiFiReader::checkQueue()
 {
   if (waiting > 0) {
     waiting--;
-    wifi_scan_msg_.data = msg_buf[waiting];
-    wifi_scan_pub_.publish(&wifi_scan_msg_);
+    size_t len = strlen(msg_buf[waiting]);
+    ch_.publish(0x17, msg_buf[waiting], len);
   }
 }
 
 void WiFiReader::checkZeroScan(int maximum)
 {
   bool all_zero = true;
-  for(int i = 0; i < n_channel; i++) {
+  for (int i = 0; i < n_channel; i++) {
     all_zero = all_zero && aps[i] == 0;
   }
   if (all_zero) {

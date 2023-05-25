@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2022  Carnegie Mellon University
+ * Copyright (c) 2020, 2023  Carnegie Mellon University and Miraikan
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,12 +20,11 @@
  * THE SOFTWARE.
  *******************************************************************************/
 
-#ifndef ARDUINO_NODE_WIFIREADER_H
-#define ARDUINO_NODE_WIFIREADER_H
+#ifndef WIFIREADER_HPP_
+#define WIFIREADER_HPP_
 
-#include "std_msgs/String.h"
 #include "WiFi.h"
-#include "esp_wifi.h"
+#include "esp_wifi.h"  // NOLINT
 #include <SPI.h>
 #include "SensorReader.h"
 
@@ -43,7 +42,7 @@
 
 // maximum wait cycle
 // if you have APs in 3 channels in your environment, the maximum wait time is like
-// (3*DEFAULT_MAX_SKIP)*(DEFAULT_SCAN_DURATION+SCAN_INTERVAL) = (3*14)*105 = 42*105 = 
+// (3*DEFAULT_MAX_SKIP)*(DEFAULT_SCAN_DURATION+SCAN_INTERVAL) = (3*14)*105 = 42*105 =
 #define DEFAULT_MAX_SKIP (14)
 
 // maximum queue size, ignore if exceeds
@@ -56,42 +55,42 @@
 
 
 class WiFiReader: public SensorReader {
-  std_msgs::String wifi_scan_msg_;
-  ros::Publisher wifi_scan_pub_;
   int max_skip = DEFAULT_MAX_SKIP;
   int n_channel = DEFAULT_N_CHANNEL;
   int scan_duration = DEFAULT_SCAN_DURATION;
   int scan_interval = DEFAULT_SCAN_INTERVAL;
   bool verbose = DEFAULT_VERBOSITY;
-  
+  // vewrbose_change : boolean -> int
+  int verbose_int = verbose;
+
   bool isScanning = false;
-  unsigned long scanningStart = 0;
+  uint32_t scanningStart = 0;
   int channel = 0;
   int skip[MAX_CHANNEL];
   int count[MAX_CHANNEL];
   int aps[MAX_CHANNEL];
-  unsigned long lastseen[MAX_CHANNEL];
+  uint32_t lastseen[MAX_CHANNEL];
   char buf[256];
-  
+
   // BSSID=17, SSID=32, CH=2, RSSI=4, sec=10, nsec=10, commas=5, total 80 + margin 20
-  char msg_buf[MAX_WAITING][100]; 
+  char msg_buf[MAX_WAITING][100];
   int waiting = 0;
   int all_zero_count = 0;
 
   void showScanStatus();
-  void (*callback_)(char*);
+  void (* callback_)(char *);
 
   void handleScan();
   void checkQueue();
   void checkZeroScan(int maximum);
-  
+
 public:
-  WiFiReader(ros::NodeHandle &nh);
-  void init(void (*callback)(char*));
+  explicit WiFiReader(cabot::Handle & ch);
+  void init(void (* callback)(char *));
   void init();
-  void set_data(char *data);
+  void set_data(char * data);
   void update();
 };
 
 
-#endif //ARDUINO_NODE_WIFIREADER_H
+#endif  // WIFIREADER_HPP_

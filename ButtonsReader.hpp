@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2022 Carnegie Mellon University, IBM Corporation, and others
+ * Copyright (c) 2020, 2023  Carnegie Mellon University and Miraikan
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,33 +20,20 @@
  * THE SOFTWARE.
  *******************************************************************************/
 
-#ifndef ARDUINO_NODE_BUTTONS_READER_ACE_H
-#define ARDUINO_NODE_BUTTONS_READER_ACE_H
+#ifndef BUTTONSREADER_HPP_
+#define BUTTONSREADER_HPP_
 
 #include <Wire.h>
-#include <std_msgs/Bool.h>
-#include <std_msgs/Int8.h>
 #include "SensorReader.h"
-#include "uart_com.h"
+#include "uart_com.h"  // NOLINT
 
-class ButtonsReader_ace: public SensorReader {
-  /*ros::Publisher b1_pub_;
-  ros::Publisher b2_pub_;
-  ros::Publisher b3_pub_;
-  ros::Publisher b4_pub_;
-  ros::Publisher b5_pub_;*/
-  ros::Publisher b_pub_;
-  /*std_msgs::Bool b1_msg_;
-  std_msgs::Bool b2_msg_;
-  std_msgs::Bool b3_msg_;
-  std_msgs::Bool b4_msg_;
-  std_msgs::Bool b5_msg_;*/
-  std_msgs::Int8 b_msg_;
-  uart_com& cm;
+class ButtonsReader: public SensorReader {
+  uart_com & cm;
+
 public:
-  ButtonsReader_ace(ros::NodeHandle &nh, uart_com& cm);
+  ButtonsReader(cabot::Handle & ch, uart_com & cm);
   void init();
   void update();
 };
 
-#endif //ARDUINO_NODE_BUTTONS_READER_ACE_H
+#endif  // BUTTONSREADER_HPP_

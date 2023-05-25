@@ -34,7 +34,6 @@ while getopts "hb:p:" arg; do
 done
 shift $((OPTIND-1))
 
-
 target=$1
 if [ -z $target ]; then
     target=build

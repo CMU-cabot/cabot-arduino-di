@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2022 Carnegie Mellon University, IBM Corporation, and others
+ * Copyright (c) 2020, 2023  Carnegie Mellon University, IBM Corporation, and others
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,35 +20,29 @@
  * THE SOFTWARE.
  *******************************************************************************/
 
-#ifndef ARDUINO_NODE_TOUCH_READER_ACE_H
-#define ARDUINO_NODE_TOUCH_READER_ACE_H
+#ifndef TOUCHREADER_HPP_
+#define TOUCHREADER_HPP_
 
 #include <Wire.h>
 #include <Adafruit_MPR121.h>
-#include <std_msgs/Int16.h>
-#include <std_msgs/Float32.h>
 #include "SensorReader.h"
-#include "uart_com.h"
+#include "uart_com.h"  // NOLINT
 
-class TouchReader_ace: public SensorReader {
+class TouchReader: public SensorReader {
   Adafruit_MPR121 cap_;
   int16_t touched_;
-  ros::Publisher touch_pub_;
-  ros::Publisher raw_pub_;
-  //ros::Publisher vel_pub_;
-  std_msgs::Int16 touch_msg_; //each of 12 channels are represented as 1 bit in message
-  std_msgs::Int16 raw_msg_;
-  //std_msgs::Float32 vel_msg_;
-
-  uart_com& cm;
+  uart_com & cm;
 
 public:
-  TouchReader_ace(ros::NodeHandle &nh, uart_com& cm);
+  TouchReader(cabot::Handle & ch, uart_com & cm);
   void init();
-  void init(uint8_t touch_baseline, uint8_t touch_threshold, uint8_t release_threshold);
+  void init(
+    uint8_t touch_baseline, uint8_t touch_threshold,
+    uint8_t release_threshold);
   void update();
+
 private:
   void set_mode(uint8_t touch_baseline);
 };
 
-#endif //ARDUINO_NODE_TOUCH_READER_ACE_H
+#endif  // TOUCHREADER_HPP_

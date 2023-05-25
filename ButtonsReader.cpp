@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2022 Carnegie Mellon University, IBM Corporation, and others
+ * Copyright (c) 2020, 2023  Carnegie Mellon University and Miraikan
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,55 +20,24 @@
  * THE SOFTWARE.
  *******************************************************************************/
 
-#include "ButtonsReader_ace.h"
-//#define BTN1_PIN (2) // up
-//#define BTN2_PIN (3) // down
-//#define BTN3_PIN (4) // left
-//#define BTN4_PIN (5) // right
+#include "ButtonsReader.hpp"
 
-ButtonsReader_ace::ButtonsReader_ace(ros::NodeHandle &nh, uart_com& cm):
-  SensorReader(nh),
-  cm(cm),
-  /*b1_pub_("pushed_1", &b1_msg_),
-  b2_pub_("pushed_2", &b2_msg_),
-  b3_pub_("pushed_3", &b3_msg_),
-  b4_pub_("pushed_4", &b4_msg_),
-  b5_pub_("pushed_5", &b5_msg_)*/
-  b_pub_("pushed", &b_msg_)
+ButtonsReader::ButtonsReader(cabot::Handle & ch, uart_com & cm)
+: SensorReader(ch), cm(cm) {}
+
+void ButtonsReader::init() {}
+
+void ButtonsReader::update()
 {
-  /*nh.advertise(b1_pub_);
-  nh.advertise(b2_pub_);
-  nh.advertise(b3_pub_);
-  nh.advertise(b4_pub_);
-  nh.advertise(b5_pub_);*/
-  nh.advertise(b_pub_);
-}
-
-void ButtonsReader_ace::init(){
-  /*pinMode(b1_pin_, INPUT_PULLUP);
-  pinMode(b2_pin_, INPUT_PULLUP);
-  pinMode(b3_pin_, INPUT_PULLUP);
-  pinMode(b4_pin_, INPUT_PULLUP);*/
-}
-
-void ButtonsReader_ace::update() {
   bool reading_1 = cm.switch_up;
   bool reading_2 = cm.switch_down;
   bool reading_3 = cm.switch_left;
   bool reading_4 = cm.switch_right;
   bool reading_5 = cm.switch_center;
-  
-  /*b1_msg_.data = reading_1;
-  b2_msg_.data = reading_2;
-  b3_msg_.data = reading_3;
-  b4_msg_.data = reading_4;
-  b5_msg_.data = reading_5;*/
-  b_msg_.data = reading_1 ? 0x01 : 0x00 | reading_2 ? 0x02 : 0x00 | reading_3 ? 0x04 : 0x00 | reading_4 ? 0x08 : 0x00 | reading_5 ? 0x10 : 0x00;
-        
-  /*b1_pub_.publish(&b1_msg_);
-  b2_pub_.publish(&b2_msg_);  
-  b3_pub_.publish(&b3_msg_);
-  b4_pub_.publish(&b4_msg_); 
-  b5_pub_.publish(&b5_msg_);*/
-  b_pub_.publish(&b_msg_);
+
+
+  int8_t temp = reading_1 ? 0x01 : 0x00 | reading_2 ? 0x02 : 0x00 | reading_3 ? 0x04 : 0x00 |
+    reading_4 ? 0x08 : 0x00 | reading_5 ? 0x10 : 0x00;
+
+  ch_.publish(0x12, temp);
 }

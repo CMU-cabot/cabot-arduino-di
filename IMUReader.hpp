@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020  Carnegie Mellon University
+ * Copyright (c) 2020, 2023  Carnegie Mellon University and Miraikan
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,29 +20,25 @@
  * THE SOFTWARE.
  *******************************************************************************/
 
-#ifndef ARDUINO_NODE_BAROMETER_H
-#define ARDUINO_NODE_BAROMETER_H
+#ifndef IMUREADER_HPP_
+#define IMUREADER_HPP_
 
-#include <Wire.h>
+#include <Adafruit_BNO055.h>
 #include <Adafruit_Sensor.h>
-//#include <Adafruit_BMP280.h>
-#include <Adafruit_BME280.h>
-#include <sensor_msgs/FluidPressure.h>
-#include <sensor_msgs/Temperature.h>
+#include <Wire.h>
 #include "SensorReader.h"
 
-class BarometerReader : public SensorReader{
-  //Adafruit_BMP280 bmp_;
-  Adafruit_BME280 bmp_;
-  sensor_msgs::FluidPressure fp_msg_;
-  sensor_msgs::Temperature tmp_msg_;
-  ros::Publisher fp_pub_;
-  ros::Publisher tmp_pub_;
+class IMUReader: public SensorReader {
+  Adafruit_BNO055 imu_;
+  int in_calibration_;
 
 public:
-  BarometerReader(ros::NodeHandle &nh);
+  explicit IMUReader(cabot::Handle & ch);
+  void calibration();
   void init();
+  void init(uint8_t * offsets);
   void update();
+  void update_calibration();
 };
 
-#endif //ARDUINO_NODE_BAROMETER_H
+#endif  // IMUREADER_HPP_

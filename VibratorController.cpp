@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2022 Carnegie Mellon University, IBM Corporation, and others
+ * Copyright (c) 2020, 2023  Carnegie Mellon University, IBM Corporation, and others
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -19,33 +19,45 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  *******************************************************************************/
+ #include "VibratorController.hpp"
 
-#ifndef ARDUINO_NODE_VIBRATOR_CONTROLLER_ACE_H
-#define ARDUINO_NODE_VIBRATOR_CONTROLLER_ACE_H
+// keep the instance as static for callback
+VibratorController * inst;
 
-#include <Wire.h>
-#include <std_msgs/UInt8.h>
-#include "SensorReader.h"
-#ifdef ESP32
-#include <analogWrite.h>
-#endif
-#include "uart_com.h"
+int ff2percent(int ff)
+{
+  return static_cast<double>((ff * 100) / 255.0);
+}
 
-//#define VIB1_PIN (19)  //front
-//#define VIB2_PIN (20)   //back //not using
-//#define VIB3_PIN (18)  //left
-//#define VIB4_PIN (17)   //right
+VibratorController::VibratorController(cabot::Handle & ch, uart_com & cm)
+: SensorReader(ch),
+  cm(cm)
+{
+  inst = this;
+  ch.subscribe(
+    0x20, [](const uint8_t msg) {
+      inst->ch_.loginfo("setting vibrator1");
+      String buf = "setting vibfrator1,";
+      buf += String(msg);
+      buf += ",";
+      buf += String(inst->cm.motor_r);
+      buf += ",";
+      buf += String(inst->cm.motor_c);
+      buf += ",";
+      buf += String(inst->cm.motor_l);
 
-class VibratorController_ace: public SensorReader {
-  ros::Subscriber<std_msgs::UInt8> vib1_sub_;
-  ros::Subscriber<std_msgs::UInt8> vib2_sub_;
-  ros::Subscriber<std_msgs::UInt8> vib3_sub_;
-  ros::Subscriber<std_msgs::UInt8> vib4_sub_;
-  uart_com& cm;
-public:
-  VibratorController_ace(ros::NodeHandle &nh, uart_com& cm);
-  void init();
-  void update();
-};
+      inst->ch_.loginfo(const_cast<char*>(buf.c_str()));
+      inst->cm.set_mot_c(ff2percent(msg));
+    });
+  ch.subscribe(0x21, [](const uint8_t msg) { /* nop: not supported */});
+  ch.subscribe(0x22, [](const uint8_t msg) {inst->cm.set_mot_l(ff2percent(msg));});
+  ch.subscribe(0x23, [](const uint8_t msg) {inst->cm.set_mot_r(ff2percent(msg));});
+}
 
-#endif //ARDUINO_NODE_VIBRATOR_CONTROLLER_H
+void VibratorController::init()
+{
+  ch_.loginfo("initializing vibrator controller");
+  cm.set_mot(0, 0, 0);
+}
+
+void VibratorController::update() {}

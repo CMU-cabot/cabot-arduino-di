@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020  Carnegie Mellon University
+ * Copyright (c) 2020, 2023  Carnegie Mellon University and Miraikan
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,35 +22,32 @@
 
 #ifdef ESP32
 #undef ESP32
-#include <ros.h>
+#include "CaBotHandle.hpp"
 #define ESP32
 #ifndef LED_BUILTIN
 #define LED_BUILTIN 2
 #endif
 #else
-#include <ros.h>
+#include "CaBotHandle.hpp"
 #endif
 
-#include "Arduino.h"
 #include <arduino-timer.h>
+#include "Arduino.h"
 
 #include "uart_com.h"
-#include "BarometerReader.h"
-//#include "ButtonsReader.h"
-#include "ButtonsReader_ace.h"
+#include "BarometerReader.hpp"
+#include "ButtonsReader.hpp"
 #include "Heartbeat.h"
-#include "IMUReader.h"
-#include "WiFiReader.h"
-//#include "TouchReader.h"
-#include "TouchReader_ace.h"
-//#include "VibratorController.h"
-#include "VibratorController_ace.h"
+#include "IMUReader.hpp"
+#include "WiFiReader.hpp"
+#include "TouchReader.hpp"
+#include "VibratorController.hpp"
 
-ros::NodeHandle nh;
+cabot::Handle ch;
 Timer<10> timer;
 
 // configurations
-#define BAUDRATE (115200)
+#define BAUDRATE (115200UL)
 
 #define HEARTBEAT_DELAY (20)
 
@@ -83,119 +80,126 @@ Timer<10> timer;
 #define TOUCH_THRESHOLD_DEFAULT (64)
 #define RELEASE_THRESHOLD_DEFAULT (24)
 
-uart_com urt_cm(nh);
+#define TIMEOUT_DEFAULT (500)
+uart_com urt_cm(ch);
 
 // sensors
-BarometerReader bmpReader(nh);
-//ButtonsReader buttonsReader(nh, BTN1_PIN, BTN2_PIN, BTN3_PIN, BTN4_PIN);
-ButtonsReader_ace buttonsReader(nh, urt_cm);
-IMUReader imuReader(nh);
-WiFiReader wifiReader(nh);
-//TouchReader touchReader(nh);
-TouchReader_ace touchReader(nh, urt_cm);
+BarometerReader bmpReader(ch);
+ButtonsReader buttonsReader(ch, urt_cm);
+IMUReader imuReader(ch);
+WiFiReader wifiReader(ch);
+TouchReader touchReader(ch, urt_cm);
 
 // controllers
-//VibratorController vibratorController(nh, VIB1_PIN, VIB2_PIN, VIB3_PIN, VIB4_PIN);
-VibratorController_ace vibratorController(nh, urt_cm);
+VibratorController vibratorController(ch, urt_cm);
 Heartbeat heartbeat(LED_BUILTIN, HEARTBEAT_DELAY);
 
-
-void setup()
-{
+void setup() {
   // set baud rate
-  nh.getHardware()->setBaud(BAUDRATE);
+  ch.setBaudRate(BAUDRATE);
   urt_cm.begin(19200);
 
   // connect to rosserial
-  nh.initNode();
-  while(!nh.connected()) {nh.spinOnce();}
-  nh.loginfo("Connected");
+  ch.init();
+
+  ch.loginfo("Connected");
+  while (!ch.connected()) {
+    ch.spinOnce();
+  }
 
   int run_imu_calibration = 0;
-  nh.getParam("~run_imu_calibration", &run_imu_calibration, 1, 500);
+  ch.getParam("run_imu_calibration", &run_imu_calibration, 1, TIMEOUT_DEFAULT);
   if (run_imu_calibration != 0) {
     imuReader.calibration();
-    timer.every(100, [](void*){
+    timer.every(100, [](void*) {
       imuReader.update();
       imuReader.update_calibration();
       return true;
     });
-    nh.loginfo("Calibration Mode started");
+    ch.loginfo("Calibration Mode started");
     return;
   }
 
   int calibration_params[22];
   uint8_t *offsets = NULL;
-  if (nh.getParam("~calibration_params", calibration_params, 22, 500)) {
-    offsets = (uint8_t*) malloc(sizeof(uint8_t) * 22);
-    for(int i = 0; i < 22; i++) {
+  if (ch.getParam("calibration_params", calibration_params, 22,
+                  TIMEOUT_DEFAULT)) {
+    offsets = (uint8_t *)malloc(sizeof(uint8_t) * 22);
+    for (int i = 0; i < 22; i++) {
       offsets[i] = calibration_params[i] & 0xFF;
     }
   } else {
-    nh.logwarn("clibration_params is needed to use IMU (BNO055) correctly.");
-    nh.logwarn("You can run calibration by setting _run_imu_calibration:=1");
-    nh.logwarn("You can check calibration value with /calibration topic.");
-    nh.logwarn("First 22 byte is calibration data, following 4 byte is calibration status for");
-    nh.logwarn("System, Gyro, Accel, Magnet, 0 (not configured) <-> 3 (configured)");
-    nh.logwarn("Specify like calibration_params:=[0, 0, 0, 0 ...]");
-    nh.logwarn("Visit the following link to check how to calibrate sensoe");
-    nh.logwarn("https://learn.adafruit.com/adafruit-bno055-absolute-orientation-sensor/device-calibration");
+    ch.logwarn("clibration_params is needed to use IMU (BNO055) correctly.");
+    ch.logwarn("You can run calibration by setting _run_imu_calibration:=1");
+    ch.logwarn("You can check calibration value with /calibration topic.");
+    ch.logwarn(
+        "First 22 byte is calibration data, following 4 byte is calibration "
+        "status for");
+    ch.logwarn(
+        "System, Gyro, Accel, Magnet, 0 (not configured) <-> 3 (configured)");
+    ch.logwarn("Specify like calibration_params:=[0, 0, 0, 0 ...]");
+    ch.logwarn("Visit the following link to check how to calibrate sensoe");
+    ch.logwarn(
+        "https://learn.adafruit.com/"
+        "adafruit-bno055-absolute-orientation-sensor/device-calibration");
   }
-  nh.loginfo("setting up WiFi");
+  ch.loginfo("setting up WiFi");
   wifiReader.init([](char *buf){
-    //nh.loginfo(buf);//TODO*
+    //ch.loginfo(buf);//TODO*
   });
 
   int touch_params[3];
   int touch_baseline;
   int touch_threshold;
   int release_threshold;
-  if (!nh.getParam("~touch_params", touch_params, 3, 500)) {
-    nh.logwarn("Please use touch_params:=[baseline,touch,release] format to set touch params");
+  if (!ch.getParam("touch_params", touch_params, 3, TIMEOUT_DEFAULT)) {
+    ch.logwarn(
+        "Please use touch_params:=[baseline,touch,release] format to set touch "
+        "params");
     touch_baseline = TOUCH_BASELINE;
-    if (nh.getParam("~touch_threshold", &touch_threshold, 1, 500)) {
-      nh.logwarn("touch_threshold is depricated");
-    } else {
-      touch_threshold = TOUCH_THRESHOLD_DEFAULT;
-    }
-    if (nh.getParam("~release_threshold", &release_threshold, 1, 500)) {
-      nh.logwarn("release_threshold is depricated");
-    } else {
-      release_threshold = RELEASE_THRESHOLD_DEFAULT;
-    }
-
-    nh.logwarn(" touched  if the raw value is less   than touch_params[0] - touch_params[1]");
-    nh.logwarn(" released if the raw value is higher than touch_params[0] - touch_params[2]");
+    touch_threshold = TOUCH_THRESHOLD_DEFAULT;
+    release_threshold = RELEASE_THRESHOLD_DEFAULT;
+    ch.logwarn(
+        " touched  if the raw value is less   than touch_params[0] - "
+        "touch_params[1]");
+    ch.logwarn(
+        " released if the raw value is higher than touch_params[0] - "
+        "touch_params[2]");
   } else {
     touch_baseline = touch_params[0];
     touch_threshold = touch_params[1];
     release_threshold = touch_params[2];
   }
-  char default_values[128];
-  sprintf(default_values, "Using [%d, %d, %d] for touch_params", touch_baseline, touch_threshold, release_threshold);
-  nh.loginfo(default_values);
+  char default_values[48];
+  snprintf(default_values, 48, "Using [%d, %d, %d] for touch_params",
+           touch_baseline, touch_threshold, release_threshold);
+  ch.loginfo(default_values);
 
   // initialize
-  nh.loginfo("starting uart com");
+  ch.loginfo("starting uart com");
   urt_cm.start();
-  nh.loginfo("setting up BMP280");
+  ch.loginfo("setting up BMP280");
   bmpReader.init();
-  nh.loginfo("setting up Buttons");
+  ch.loginfo("setting up Buttons");
   buttonsReader.init();
-  nh.loginfo("setting up BNO055");
+  ch.loginfo("setting up BNO055");
   imuReader.init(offsets);
-  nh.loginfo("setting up MPR121");
+  ch.loginfo("setting up MPR121");
   touchReader.init(touch_baseline, touch_threshold, release_threshold);
-  nh.loginfo("setting up vibrations");
+  ch.loginfo("setting up vibrations");
   vibratorController.init();
-  nh.loginfo("setting up heartbeat");
+  ch.loginfo("setting up heartbeat");
   heartbeat.init();
 
-  
   // wait sensors ready
   delay(100);
 
   // set timers
+  timer.every(1000, [](void*){
+      ch.sync();
+      return true;
+    });
+
   timer.every(500, [](void*){
       bmpReader.update();
       urt_cm.publish();
@@ -213,19 +217,19 @@ void setup()
       imuReader.update();
       return true;
     });
+
   timer.every(20, [](void*){
     wifiReader.update();
     return true;
   });
-  
-  nh.loginfo("Arduino is ready");
+
+  ch.loginfo("Arduino is ready");
 }
 
-void loop()
-{
+void loop() {
   timer.tick<void>();
   urt_cm.update();
-  nh.spinOnce();
+  ch.spinOnce();
 }
 
 void restart()

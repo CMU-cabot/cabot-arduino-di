@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020  Carnegie Mellon University
+ * Copyright (c) 2020, 2023  Carnegie Mellon University and Miraikan
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,30 +20,28 @@
  * THE SOFTWARE.
  *******************************************************************************/
 
-#ifndef ARDUINO_NODE_SENSORREADER_H
-#define ARDUINO_NODE_SENSORREADER_H
+#ifndef SENSORREADER_H_
+#define SENSORREADER_H_
 
+#include <Arduino.h>
 #ifdef ESP32
 #undef ESP32
-#include <ros.h>
+#include "CaBotHandle.hpp"
 #define ESP32
 #else
-#include <ros.h>
+#include "CaBotHandle.hpp"
 #endif
-#include <Arduino.h>
 
 class SensorReader {
 protected:
-  ros::NodeHandle &nh_;
+  cabot::Handle & ch_;
   bool initialized_;
-  
+
 public:
-SensorReader(ros::NodeHandle &nh):
-  nh_(nh),
-  initialized_(false)
-  {}
-  virtual void init()=0;
-  virtual void update()=0;
+  explicit SensorReader(cabot::Handle & ch) : ch_(ch), initialized_(false) {
+  }
+  virtual void init() = 0;
+  virtual void update() = 0;
 };
 
-#endif //ARDUINO_NODE_SENSORREADER_H
+#endif  // SENSORREADER_H_
