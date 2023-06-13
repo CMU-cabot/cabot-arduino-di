@@ -20,7 +20,7 @@
  * THE SOFTWARE.
  *******************************************************************************/
 
-#include "IMUReader.hpp"
+#include "IMUReader.hpp"  // NOLINT
 
 #define D2R 0.0174532925
 

@@ -1,0 +1,52 @@
+---
+name: Arduino_CI
+
+on:
+  push:
+    branches: [ master, ros2 ]
+
+jobs:
+  arduino_ci:
+    needs: [ cpplint, uncrustify ]
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v3
+      - uses: arduino/compile-sketches@v1
+        with:
+          sketch-paths: |
+            - .
+          fqbn: "esp32:esp32:esp32"
+          platforms: |
+            - source-url: https://dl.espressif.com/dl/package_esp32_index.json
+              name: esp32:esp32
+          libraries: |
+            - name: Rosserial Arduino Library
+              version: 0.9.1
+            - name: Adafruit BNO055
+            - name: Adafruit BME280 Library
+            - name: Adafruit MPR121
+            - name: arduino-timer
+            - name: ESP32 AnalogWrite
+
+  cpplint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup cpplint
+        run: |
+          sudo apt install python3-pip
+          pip install cpplint
+      - uses: actions/checkout@v3
+      - name: Run cpplint
+        run: |
+          cpplint --recursive .
+
+  uncrustify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup uncrustify
+        run: |
+          sudo apt-get install -y uncrustify
+      - uses: actions/checkout@v3
+      - name: Run uncrustify
+        run: |
+          ls *.ino *.h *.cpp | uncrustify -c code_style.cfg --check -F -

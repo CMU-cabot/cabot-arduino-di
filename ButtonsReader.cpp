@@ -20,7 +20,7 @@
  * THE SOFTWARE.
  *******************************************************************************/
 
-#include "ButtonsReader.hpp"
+#include "ButtonsReader.hpp"  // NOLINT
 
 ButtonsReader::ButtonsReader(cabot::Handle & ch, uart_com & cm)
 : SensorReader(ch), cm(cm) {}

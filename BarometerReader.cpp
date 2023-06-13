@@ -20,7 +20,7 @@
  * THE SOFTWARE.
  *******************************************************************************/
 
-#include "BarometerReader.hpp"
+#include "BarometerReader.hpp"  // NOLINT
 
 BarometerReader::BarometerReader(cabot::Handle & ch)
 : SensorReader(ch) {}

@@ -20,7 +20,7 @@
  * THE SOFTWARE.
  *******************************************************************************/
 
-#include "CaBotHandle.hpp"
+#include "CaBotHandle.hpp"  // NOLINT
 
 // #define DEBUG 1
 
@@ -103,7 +103,7 @@ void Handle::spinOnce()
       need_to_update = true;
     } else {
       snprintf(
-        buff, sizeof(buff), "large time jump %lu.%09lu -> %lu.%09lu",
+        buff, sizeof(buff), "large time jump %u.%09u -> %u.%09u",
         prev.sec, prev.nsec, current.sec, current.nsec);
       logwarn(buff);
     }
@@ -111,7 +111,7 @@ void Handle::spinOnce()
     // #ifdef DEBUG
     snprintf(
       buff, sizeof(buff),
-      "sync,%lu,%lu.%03lu,%lu.%03lu,%lu.%03lu,%ld,%ld,%ld,%ld", ms,
+      "sync,%u,%u.%03u,%u.%03u,%u.%03u,%d,%d,%d,%d", ms,
       newTime.sec, newTime.nsec / 1000000, prev.sec, prev.nsec / 1000000,
       current.sec, current.nsec / 1000000, jump, turn_around_time,
       back_time, temp);
@@ -145,11 +145,11 @@ void Handle::subscribe(uint8_t cmd, void (* callback)(const uint8_t))
 
 void Handle::logdebug(char * text) {sendCommand(0x02, text, strlen(text));}
 
-void Handle::loginfo(char * text) {sendCommand(0x03, text, strlen(text));}
+void Handle::loginfo(const char * text) {sendCommand(0x03, text, strlen(text));}
 
-void Handle::logwarn(char * text) {sendCommand(0x04, text, strlen(text));}
+void Handle::logwarn(const char * text) {sendCommand(0x04, text, strlen(text));}
 
-bool Handle::getParam(char * name, int * out, size_t num, int timeout_ms)
+bool Handle::getParam(const char * name, int * out, size_t num, int timeout_ms)
 {
   sendCommand(0x08, name, strlen(name));
   uint8_t cmd = 0x08;
@@ -341,7 +341,7 @@ size_t Handle::readCommand(uint8_t * expect, uint8_t ** ptr)
     size = (received & 0xFF) << size_count * 8;
     size_count += 1;
     if (size_count == DATA_MAX_SIZE_BYTE) {
-      if (size < 0 || sizeof(buffer) < size) {
+      if (sizeof(buffer) < size) {
         state = 0;
         return 0;
       } else if (size == 0) {
@@ -375,7 +375,7 @@ size_t Handle::readCommand(uint8_t * expect, uint8_t ** ptr)
 bool Handle::sendCommand(uint8_t type, uint8_t * data, size_t num)
 {
   static uint8_t buffer[256 + 6];
-  if (num < 0 || 256 < num) {
+  if (256 < num) {
     return false;
   }
 
@@ -399,9 +399,9 @@ bool Handle::sendCommand(uint8_t type, uint8_t * data, size_t num)
   return true;
 }
 
-bool Handle::sendCommand(uint8_t type, char * data, size_t num)
+bool cabot::Handle::sendCommand(uint8_t type, const char * data, size_t num)
 {
-  return sendCommand(type, reinterpret_cast<uint8_t *>(data), num);
+  return sendCommand(type, reinterpret_cast<uint8_t *>(const_cast<char *>(data)), num);
 }
 
 uint8_t Handle::checksum(uint8_t * data, size_t num)

@@ -211,6 +211,7 @@ bool uart_com::parse_error()
   // ORE, NE, FE, PE
   this->error_count += ((code >> 3) % 2 * 1000000) + ((code >> 2) % 2 * 10000) +
     ((code >> 1) % 2 * 100) + code % 2;
+  return true;
 }
 
 void uart_com::StringCmdParse(char c)
@@ -241,7 +242,7 @@ void uart_com::StringCmdParse(char c)
   // Start command parsing when line feed code is received
   if (c == '\n') {
     char CmdCpy[CMD_BUF_MAX];
-    snprintf(CmdCpy, CmdCpy[CMD_BUF_MAX], "%s", CmdBuf);
+    snprintf(CmdCpy, sizeof(CmdCpy), "%s", CmdBuf);
 
     // Split string by ','
     char * str_save = NULL;
@@ -253,7 +254,7 @@ void uart_com::StringCmdParse(char c)
     }
 
     // Exit if there is no received character.
-    if (words_len == 0) {words[0] = "";}
+    if (words_len == 0) {words[0][0] = '\0';}
 
     if (strcmp(words[0], "DAT") == 0) {
       if (this->parse_dat()) {

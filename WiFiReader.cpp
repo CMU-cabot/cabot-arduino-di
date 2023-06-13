@@ -20,7 +20,7 @@
  * THE SOFTWARE.
  *******************************************************************************/
 
-#include "WiFiReader.hpp"
+#include "WiFiReader.hpp"  // NOLINT
 #include <algorithm>
 
 extern void restart();
@@ -67,11 +67,11 @@ void WiFiReader::init()
 
 void WiFiReader::showScanStatus()
 {
-  snprintf(buf, buf[256], "%c", "WiFi: ");
+  snprintf(buf, sizeof(buf), "%s", "WiFi: ");
   for (int i = 0; i < n_channel; i++) {
-    snprintf(buf + strlen(buf), buf[256], "%2d|", aps[i]);
+    snprintf(buf + strlen(buf), sizeof(buf + strlen(buf)), "%2d|", aps[i]);
   }
-  snprintf(buf + strlen(buf), buf[256], "%2d|", all_zero_count);
+  snprintf(buf + strlen(buf), sizeof(buf + strlen(buf)), "%2d|", all_zero_count);
 
   callback_(buf);
 }
@@ -108,7 +108,7 @@ void WiFiReader::handleScan()
       // start scan for the current channcel
       //
       // definition
-      int n = WiFi.scanNetworks(true, false, false, scan_duration, channel + 1);
+      WiFi.scanNetworks(true, false, false, scan_duration, channel + 1);
       scanningStart = millis();
       count[channel] = 0;
       isScanning = true;
@@ -126,7 +126,7 @@ void WiFiReader::handleScan()
       showScanStatus();
       if (verbose) {
         snprintf(
-          buf, buf[256], "[ch:%2d][%3dAPs][skip:%2d/%2d]%3dms,%5dms",
+          buf, sizeof(buf), "[ch:%2d][%3dAPs][skip:%2d/%2d]%3lums,%5lums",
           channel + 1, n, skip[channel], max_skip,
           millis() - scanningStart, millis() - lastseen[channel]);
         // ch_.loginfo(buf);
@@ -144,7 +144,7 @@ void WiFiReader::handleScan()
           String name = WiFi.SSID(i);
           name.replace(",", " ");
           snprintf(
-            msg_buf[waiting], msg_buf[MAX_WAITING][100], "%s,%s,%d,%d,%d,%d",
+            msg_buf[waiting], sizeof(msg_buf[waiting]), "%s,%s,%d,%d,%d,%d",
             WiFi.BSSIDstr(i).c_str(), name.c_str(), WiFi.channel(i),
             WiFi.RSSI(i), ch_.now().sec, ch_.now().nsec);
           waiting++;

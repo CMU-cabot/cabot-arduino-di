@@ -25,14 +25,15 @@
 #define CMD_BUF_MAX (128)
 #define MAX_LEN  64
 
-class uart_com: SensorReader {
+class uart_com : SensorReader
+{
 private:
   // for parsing
   char CmdBuf[CMD_BUF_MAX];  // command buffer
   int CmdBuf_wp = 0;  // Number of stored in command buffer
   char * words[MAX_LEN];
   int words_len = 0;
-  char * delim = ",";
+  const char delim[2] = ",";
   bool CMD_PARSE_FLAG = false;
   bool StartFlg = false;
 

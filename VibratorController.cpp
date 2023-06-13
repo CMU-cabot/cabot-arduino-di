@@ -46,7 +46,7 @@ VibratorController::VibratorController(cabot::Handle & ch, uart_com & cm)
       buf += ",";
       buf += String(inst->cm.motor_l);
 
-      inst->ch_.loginfo(const_cast<char*>(buf.c_str()));
+      inst->ch_.loginfo(const_cast<char *>(buf.c_str()));
       inst->cm.set_mot_c(ff2percent(msg));
     });
   ch.subscribe(0x21, [](const uint8_t msg) { /* nop: not supported */});

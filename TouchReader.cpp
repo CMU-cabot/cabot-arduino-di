@@ -20,7 +20,7 @@
  * THE SOFTWARE.
  *******************************************************************************/
 
-#include "TouchReader.hpp"
+#include "TouchReader.hpp"  // NOLINT
 
 TouchReader::TouchReader(cabot::Handle & ch, uart_com & cm)
 : SensorReader(ch), cm(cm) {}

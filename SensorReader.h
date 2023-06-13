@@ -26,19 +26,22 @@
 #include <Arduino.h>
 #ifdef ESP32
 #undef ESP32
-#include "CaBotHandle.hpp"
+#include "CaBotHandle.hpp"  // NOLINT
 #define ESP32
 #else
-#include "CaBotHandle.hpp"
+#include "CaBotHandle.hpp"  // NOLINT
 #endif
 
-class SensorReader {
+class SensorReader
+{
 protected:
   cabot::Handle & ch_;
   bool initialized_;
 
 public:
-  explicit SensorReader(cabot::Handle & ch) : ch_(ch), initialized_(false) {
+  explicit SensorReader(cabot::Handle & ch)
+  : ch_(ch), initialized_(false)
+  {
   }
   virtual void init() = 0;
   virtual void update() = 0;

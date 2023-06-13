@@ -48,9 +48,9 @@ public:
     void spinOnce();
     void subscribe(uint8_t, void (*)(const uint8_t));
     void logdebug(char *);
-    void loginfo(char *);
-    void logwarn(char *);
-    bool getParam(char *, int *, size_t, int);
+    void loginfo(const char *);
+    void logwarn(const char *);
+    bool getParam(const char *, int *, size_t, int);
     void publish(uint8_t, uint8_t *, size_t);
     void publish(uint8_t, int8_t *, size_t);
     void publish(uint8_t, char *, size_t);
@@ -66,7 +66,7 @@ private:
     Time _now(Time, uint32_t, uint32_t);
     int32_t timeDiff(Time, Time);
     bool sendCommand(uint8_t, uint8_t *, size_t);
-    bool sendCommand(uint8_t, char *, size_t);
+    bool sendCommand(uint8_t, const char *, size_t);
     size_t readCommand(uint8_t *, uint8_t **);
     uint8_t checksum(uint8_t *, size_t);
     uint32_t parseUInt32(uint8_t * ptr);
