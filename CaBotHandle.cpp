@@ -372,7 +372,7 @@ size_t Handle::readCommand(uint8_t * expect, uint8_t ** ptr)
   return -1;
 }
 
-bool Handle::sendCommand(uint8_t type, uint8_t * data, size_t num)
+bool cabot::Handle::sendCommand(uint8_t type, const uint8_t * data, size_t num)
 {
   static uint8_t buffer[256 + 6];
   if (256 < num) {
@@ -401,10 +401,10 @@ bool Handle::sendCommand(uint8_t type, uint8_t * data, size_t num)
 
 bool cabot::Handle::sendCommand(uint8_t type, const char * data, size_t num)
 {
-  return sendCommand(type, reinterpret_cast<uint8_t *>(const_cast<char *>(data)), num);
+  return sendCommand(type, reinterpret_cast<const uint8_t *>(data), num);
 }
 
-uint8_t Handle::checksum(uint8_t * data, size_t num)
+uint8_t Handle::checksum(const uint8_t * data, size_t num)
 {
   uint8_t temp = 0;
   for (size_t i = 0; i < num; i++) {

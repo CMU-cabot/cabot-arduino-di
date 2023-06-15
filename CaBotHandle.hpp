@@ -65,10 +65,10 @@ public:
 private:
     Time _now(Time, uint32_t, uint32_t);
     int32_t timeDiff(Time, Time);
-    bool sendCommand(uint8_t, uint8_t *, size_t);
+    bool sendCommand(uint8_t, const uint8_t *, size_t);
     bool sendCommand(uint8_t, const char *, size_t);
     size_t readCommand(uint8_t *, uint8_t **);
-    uint8_t checksum(uint8_t *, size_t);
+    uint8_t checksum(const uint8_t *, size_t);
     uint32_t parseUInt32(uint8_t * ptr);
     void toBytes(uint32_t v, uint8_t * ptr, size_t num);
     void toBytes(float, uint8_t * ptr);
