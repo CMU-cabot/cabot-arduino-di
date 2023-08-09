@@ -32,7 +32,7 @@ jobs:
             - name: arduino-timer
               version: 3.0.0
             - name: ESP32 AnalogWrite
-              version: 0.1
+              version: "0.1"
 
   cpplint:
     runs-on: ubuntu-latest
