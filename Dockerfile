@@ -9,5 +9,4 @@ RUN arduino-cli lib install "Adafruit BNO055"
 RUN arduino-cli lib install "Adafruit BME280 Library"
 RUN arduino-cli lib install "Adafruit MPR121"
 RUN arduino-cli lib install "arduino-timer"
-RUN arduino-cli lib install "ESP32 AnalogWrite"
 RUN pip3 install pyserial

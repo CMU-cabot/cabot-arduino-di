@@ -1,5 +1,3 @@
-#include <analogWrite.h>
-
 /*******************************************************************************
  * Copyright (c) 2020  Carnegie Mellon University
  *
