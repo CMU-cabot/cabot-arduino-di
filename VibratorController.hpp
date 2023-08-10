@@ -25,6 +25,9 @@
 
 #include <Wire.h>
 #include "SensorReader.h"
+#ifdef ESP32
+#include <analogWrite.h>
+#endif
 #include "uart_com.h"  // NOLINT
 
 class VibratorController: public SensorReader {
