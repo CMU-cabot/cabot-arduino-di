@@ -26,6 +26,7 @@ jobs:
             - name: Adafruit BME280 Library
             - name: Adafruit MPR121
             - name: arduino-timer
+            - name: ESP32 AnalogWrite
 
   cpplint:
     runs-on: ubuntu-latest
