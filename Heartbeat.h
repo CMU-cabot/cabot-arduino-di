@@ -24,6 +24,9 @@
 #define HEARTBEAT_H_
 
 #include <Arduino.h>
+#ifdef ESP32
+#include <analogWrite.h>
+#endif
 
 class Heartbeat
 {
