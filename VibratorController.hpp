@@ -32,7 +32,7 @@
 
 class VibratorController: public SensorReader {
   uart_com & cm;
-
+  uint16_t vibrations[4];
 public:
   VibratorController(cabot::Handle & ch, uart_com & cm);
   void init();
