@@ -47,7 +47,6 @@ void Handle::init()
   size_count = 0;
   cmd = 0;
   count = 0;
-
   if (mBaudRate == 0) {
     return;
   }
@@ -126,7 +125,7 @@ void Handle::spinOnce()
   }
   if (0x20 <= cmd && cmd <= 0x23 && count == 1) {
     // feedback to the host
-    // sendCommand(cmd, data, 1);
+    sendCommand(cmd, data, 1);
     // vibration commands
     for (int i = 0; i < 4; i++) {
       if (callbacks[i].cmd == cmd) {
