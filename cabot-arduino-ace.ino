@@ -224,6 +224,7 @@ void setup()
   timer.every(
     10, [] (void *) {
     imuReader.update();
+    vibratorController.update();
     return true;
   });
 
