@@ -32,6 +32,10 @@ class TouchReader: public SensorReader {
   Adafruit_MPR121 cap_;
   int16_t touched_;
   uart_com & cm;
+  bool is_continuous_;
+  uint8_t diag_status_;
+  String diag_message_;
+  int count_;
 
 public:
   TouchReader(cabot::Handle & ch, uart_com & cm);
@@ -40,6 +44,8 @@ public:
     uint8_t touch_baseline, uint8_t touch_threshold,
     uint8_t release_threshold);
   void update();
+  void diag_pub();
+  void check_touch_raw(int16_t touch_raw);
 
 private:
   void set_mode(uint8_t touch_baseline);
