@@ -28,6 +28,10 @@ TouchReader::TouchReader(cabot::Handle & ch, uart_com & cm)
 void TouchReader::init()
 {
   initialized_ = true;
+  is_continuous_ = false;
+  diag_status_ = 0;
+  diag_message_ = "working";
+  count_ = 0;
 }
 
 void TouchReader::init(
@@ -36,6 +40,10 @@ void TouchReader::init(
 {
   ch_.loginfo("Touch initialized");
   initialized_ = true;
+  is_continuous_ = false;
+  diag_status_ = 0;
+  diag_message_ = "working";
+  count_ = 0;
 }
 
 void TouchReader::set_mode(uint8_t touch_baseline)
@@ -50,10 +58,45 @@ void TouchReader::update()
   }
   int touched = cm.touch ? 1 : 0;
 
+  int16_t touch_raw = cm.capacitance;
+
+  check_touch_raw(touch_raw);
+
   // touch
   ch_.publish(0x10, (int16_t)touched);
   // TBR
-  ch_.publish(0x11, (int16_t)cm.capacitance);
+  ch_.publish(0x11, touch_raw);
   // vel
   // ch_.publish(0x01, (int16_t)(touched & 0x01) ? 2.0 : 0);
+}
+
+void TouchReader::diag_pub()
+{
+  size_t len = diag_message_.length() + 1;
+  uint8_t combinedData[len];
+  int index = 0;
+
+  combinedData[index++] = diag_status_;
+
+  for(char c : diag_message_) {
+    if (index < len) {
+      combinedData[index++] = static_cast<uint8_t>(c);
+    }
+  }
+  ch_.publish(0x30, combinedData, len);
+}
+
+void TouchReader::check_touch_raw(int16_t touch_raw)
+{
+  if (touch_raw == 0) {
+    count_++;
+      if (count_ > 100) {
+        diag_status_ = 2; //error
+        diag_message_ = "touch_raw is constant at 0";
+      }
+  } else {
+      diag_status_ = 0;
+      count_ = 0;
+      diag_message_ = "working";
+  }
 }

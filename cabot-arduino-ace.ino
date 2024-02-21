@@ -210,6 +210,7 @@ void setup()
     500, [] (void *) {
     bmpReader.update();
     urt_cm.publish();
+    touchReader.diag_pub();
     return true;
   });
 
