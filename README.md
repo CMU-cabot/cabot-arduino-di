@@ -47,6 +47,7 @@ One example of hardware components
 - [MPR121](https://www.adafruit.com/product/1982) capacitive touch sensor
 - [BNG055](https://www.adafruit.com/product/2472) 9-axis IMU
 - [BMP280](https://www.adafruit.com/product/2651) Barometric Pressure & Altitude Sensor
+- [DA7280](https://github.com/sparkfun/SparkFun_Qwiic_Haptic_Driver_DA7280_Arduino_Library) Haptic Driver
 - [PCB shield example](https://github.com/RealCabot/simplePCB.git)
   - This Arduino shield is derived from an earlier project. It includes motor controllers, but here we will use it for IMU and touch sensor (does not include barometric pressure sensor part)
 - 4 [push buttons](https://www.adafruit.com/product/4183)

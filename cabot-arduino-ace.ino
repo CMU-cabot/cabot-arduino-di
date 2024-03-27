@@ -1,5 +1,6 @@
 /*******************************************************************************
  * Copyright (c) 2020, 2023  Carnegie Mellon University and Miraikan
+ * Copyright (c) 2024  ALPS ALPINE CO.,LTD.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -37,11 +38,12 @@
 #include "uart_com.h"
 #include "BarometerReader.hpp"
 #include "ButtonsReader.hpp"
-#include "Heartbeat.h"
+// #include "Heartbeat.h"
 #include "IMUReader.hpp"
 #include "WiFiReader.hpp"
 #include "TouchReader.hpp"
-#include "VibratorController.hpp"
+#include "ServoController.hpp"
+#include "VibController.hpp"
 
 cabot::Handle ch;
 Timer < 10 > timer;
@@ -90,8 +92,9 @@ WiFiReader wifiReader(ch);
 TouchReader touchReader(ch, urt_cm);
 
 // controllers
-VibratorController vibratorController(ch, urt_cm);
-Heartbeat heartbeat(LED_BUILTIN, HEARTBEAT_DELAY);
+// Heartbeat heartbeat(LED_BUILTIN, HEARTBEAT_DELAY);
+ServoController servoController(ch, urt_cm);
+VibController vibController(ch, urt_cm);
 
 void setup()
 {
@@ -146,11 +149,13 @@ void setup()
       "https://learn.adafruit.com/"
       "adafruit-bno055-absolute-orientation-sensor/device-calibration");
   }
+
   ch.loginfo("setting up WiFi");
   wifiReader.init(
     [] (char * buf) {
-    //ch.loginfo(buf);//TODO*
+    // ch.loginfo(buf); //TODO*
   });
+
 
   int touch_params[3];
   int touch_baseline;
@@ -191,10 +196,12 @@ void setup()
   imuReader.init(offsets);
   ch.loginfo("setting up MPR121");
   touchReader.init(touch_baseline, touch_threshold, release_threshold);
-  ch.loginfo("setting up vibrations");
-  vibratorController.init();
-  ch.loginfo("setting up heartbeat");
-  heartbeat.init();
+  // ch.loginfo("setting up heartbeat");
+  // heartbeat.init();
+  ch.loginfo("setting up servoMotor");
+  servoController.init();
+  ch.loginfo("setting up vibrator");
+  vibController.init();
 
   // wait sensors ready
   delay(100);
@@ -216,16 +223,17 @@ void setup()
 
   timer.every(
     20, [] (void *) {
-    //heartbeat.update();
+    // heartbeat.update();
     buttonsReader.update();
     touchReader.update();
+    servoController.update();
+    vibController.update();
     return true;
   });
 
   timer.every(
     10, [] (void *) {
     imuReader.update();
-    vibratorController.update();
     return true;
   });
 

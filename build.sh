@@ -41,7 +41,7 @@ fi
 
 function build() {
     echo "building for $board..."
-    arduino-cli compile -b $board --warnings all .
+    arduino-cli compile -b $board .
 }
 
 function upload() {

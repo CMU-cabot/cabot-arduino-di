@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2023  Carnegie Mellon University, IBM Corporation, and others
+ * Copyright (c) 2024  ALPS ALPINE CO., LTD.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,23 +20,25 @@
  * THE SOFTWARE.
  *******************************************************************************/
 
-#ifndef VIBRATORCONTROLLER_HPP_
-#define VIBRATORCONTROLLER_HPP_
+#ifndef ARDUINO_NODE_SERVO_CONTROLLER_H
+#define ARDUINO_NODE_SERVO_CONTROLLER_H
 
+#include <IcsHardSerialClass.h>
 #include <Wire.h>
 #include "SensorReader.h"
-#ifdef ESP32
-#include <analogWrite.h>
-#endif
 #include "uart_com.h"  // NOLINT
 
-class VibratorController: public SensorReader {
-  uart_com & cm;
-  uint16_t vibrations[4];
+class ServoController: public SensorReader {
+  static int16_t KRS_position;
+  uart_com &cm;
+
 public:
-  VibratorController(cabot::Handle & ch, uart_com & cm);
+  ServoController(cabot::Handle &ch, uart_com &cm);
   void init();
   void update();
+  static int16_t get_servo_direction(int servo_pos);
+  static void servo_target_msg_(int16_t msg);
+  static void servo_free_msg_(bool msg);
 };
 
-#endif  // VIBRATORCONTROLLER_HPP_
+#endif //ARDUINO_NODE_SERVO_CONTROLLER_H

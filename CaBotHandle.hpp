@@ -1,5 +1,6 @@
 /*******************************************************************************
  * Copyright (c) 2020, 2022  Carnegie Mellon University
+ * Copyright (c) 2024  ALPS ALPINE CO.,LTD.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -36,6 +37,9 @@ namespace cabot {
   {
     uint8_t cmd;
     void (* callback)(const uint8_t);
+    void (* callback_ui16)(const uint16_t);
+    void (* callback_i16)(const int16_t);
+    void (* callback_b)(const bool);
   } Callback;
 
 class Handle {
@@ -46,7 +50,11 @@ public:
     void init();
     bool connected();
     void spinOnce();
+    uint16_t decode_binary_16bit(uint8_t *);
     void subscribe(uint8_t, void (*)(const uint8_t));
+    void subscribe(uint8_t, void (*)(const uint16_t));
+    void subscribe(uint8_t, void (*)(const int16_t));
+    void subscribe(uint8_t, void (*)(const bool));
     void logdebug(char *);
     void loginfo(const char *);
     void logwarn(const char *);
@@ -56,7 +64,9 @@ public:
     void publish(uint8_t, char *, size_t);
     void publish(uint8_t, float *, size_t);
     void publish(uint8_t, int8_t);
+    void publish(uint8_t, uint8_t);
     void publish(uint8_t, int16_t);
+    void publish(uint8_t, uint16_t);
     void publish(uint8_t, float);
     void sync();
     bool is_synchronized();
@@ -88,7 +98,7 @@ private:
     uint8_t size_count = 0;
     uint8_t cmd = 0;
     uint8_t count = 0;
-    Callback callbacks[4];
+    Callback callbacks[10];
     size_t callback_count = 0;
   };
 }  // namespace cabot
