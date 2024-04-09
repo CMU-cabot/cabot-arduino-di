@@ -3,7 +3,7 @@
 # CaBot Arduino DI (Directional Indicator)
 
 # Usage
-- see [cabot-drivers](https://github.com/CMU-cabot/cabot-drivers) to run the example
+- see [cabot-drivers](https://github.com/CMU-cabot/cabot-drivers/tree/main/cabot_serial) to run the example
 ```
 cabot-drivers$ docker compose run --rm driver bash
 $ source install/setup.bash
