@@ -1,31 +1,18 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-
-# CaBot Arduino Serial
-
-This is a fork version of cabot-arduino which communicates with CaBot's Arduino board with a raw serial connection instead of using rosserial library.
-
-- We will migrate CaBot from ROS to ROS2
-- ROS2 does not support rosserial
-- ROS2 offers microROS but Arduino MEGA is not supported (need more RAM)
-
-So, we decided to use raw serial connection between PC and Arduino board and wrap it for ROS and ROS2.
-
----
-copy of the original description
-
-# Cabot-Arduino
-
-This repository contains an Arduino project for CaBot, managaing sensors and the handle.
+# CaBot Arduino DI (Directional Indicator)
 
 # Usage
-
+- see [cabot-drivers](https://github.com/CMU-cabot/cabot-drivers) to run the example
 ```
-$ rosrun rosserial_python serial_node.py <parameters>
+cabot-drivers$ docker compose run --rm driver bash
+$ source install/setup.bash
+$ ros2 run cabot_serial cabot_serial_node --ros-args -p port:=/dev/ttyESP32 [other parameters]
 ```
 
 ## parameters
 
+- **run_imu_calibration** : `bool` Run IMU calibration if this flag is set
 - **calibration_params** : `int[22]`
   - BNO055 calibration parameter. Follow instruction when you not specify this parameter.
 - **touch_params** : [`touch_base (int)`, `touch_threshold (int)`, `release_threshold (int)`]
@@ -33,8 +20,13 @@ $ rosrun rosserial_python serial_node.py <parameters>
   - `touch_base` - base value when you don't touch the touch sensor
   - `touch_threshold` - if the value is below `touch_base - touch_threshold` then changes to touch state
   - `release_threshold` - After transitioning to touch state, the value bigger than `touch_base - release_threshold` then changes to release state
-- ~**touch_threshold**~ deprecated (int) - touch threshold
-- ~**release_threshold**~ deprecated - release threshold
+
+
+## Serial Connection
+
+- It used to use rosserial for serial connection with ROS1
+- ROS2 offers micro ROS, but it does not fit to our board, so we implemented custom serial communication
+  - see CaBotHandle.cpp/hpp for the details
 
 ## Pre-requisites
 
@@ -42,17 +34,13 @@ $ rosrun rosserial_python serial_node.py <parameters>
 
 One example of hardware components
 
-- [3D print parts](https://github.com/CMU-cabot/cabot_design/tree/master/cabot2_e2/handle)
-- [Arduino Mega 2560](https://store.arduino.cc/usa/mega-2560-r3) or ESP32 (beta)
+- [ESP32](https://www.espressif.com/en/products/devkits)
 - [MPR121](https://www.adafruit.com/product/1982) capacitive touch sensor
 - [BNG055](https://www.adafruit.com/product/2472) 9-axis IMU
-- [BMP280](https://www.adafruit.com/product/2651) Barometric Pressure & Altitude Sensor
-- [DA7280](https://github.com/sparkfun/SparkFun_Qwiic_Haptic_Driver_DA7280_Arduino_Library) Haptic Driver
-- [PCB shield example](https://github.com/RealCabot/simplePCB.git)
-  - This Arduino shield is derived from an earlier project. It includes motor controllers, but here we will use it for IMU and touch sensor (does not include barometric pressure sensor part)
-- 4 [push buttons](https://www.adafruit.com/product/4183)
-- 3 [mini disc vibrators](https://www.adafruit.com/product/1201)
-- Conductive Material (ex. [Copper foil tape](https://www.adafruit.com/product/3483))
+- [BME280](https://www.adafruit.com/product/2652) Barometric Pressure & Altitude Sensor
+- 4/5 [push buttons](https://www.adafruit.com/product/4183)
+- 3 [vibrators](https://www.sparkfun.com/products/17590)
+- 1 [servo motor](https://kondo-robot.com/product/krs-3304r2-ics)
 - Wires and headers
 
 ### Software (docker, arduino-ide)
@@ -70,39 +58,6 @@ docker $ arduino-cli upload -b esp32:esp32:esp32 -p /dev/ttyESP32 .
 - change `-b <board type> -p <port>` for your environment
 - linux is required to upload built sketch (Windows/Mac docker container does not support)
 
-
-### Software (Arduino IDE)
-
-In order to run ROS on Arduino Mega 2560, you will need both the Arduino IDE as well as ROS Serial Arduino Library. Please follow the instructions on the following page for installing these requirements:
-[Installation instructions](http://wiki.ros.org/rosserial_arduino/Tutorials/Arduino%20IDE%20Setup)
-
-<font color = "blue">After installing Arduino IDE, please make sure to open the IDE at least once before proceeding to the next steps.</font>
-
-The following packages are essential for letting the touch sensor, push buttons and vibrator communicate with Arduino Mega 2560. Please open a new terminal and copy-paste the following instructions:
-```
-cd ~/Arduino/libraries
-git clone https://github.com/adafruit/Adafruit_BNO055.git
-git clone https://github.com/adafruit/Adafruit_Sensor.git
-git clone https://github.com/adafruit/Adafruit_ADXL343.git
-git clone https://github.com/adafruit/Adafruit_MPR121.git
-git clone https://github.com/adafruit/Adafruit_BMP280.git
-git clone https://github.com/contrem/arduino-timer
-git clone https://github.com/frankjoshua/rosserial_arduino_lib.git
-rosrun rosserial_arduino make_libraries.py ~/Arduino
-```
-
-#### tips
-
-- rosserial 0.7.9 works with Arduino Mega 2560
-- rosserial 0.9.1 works with EPS32
-
-## Assembly instructions
-
-The following figure explains the manner in which the touch sensor, push buttons and vibrators are supposed to be connected with Arduino Mega 2560.
-
-<p align="center">
-  <img src="figures/Arduino_shield.svg">
-</p>
 
 ## Components description
 
