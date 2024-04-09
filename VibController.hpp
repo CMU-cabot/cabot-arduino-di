@@ -1,7 +1,5 @@
-#include <analogWrite.h>
-
 /*******************************************************************************
- * Copyright (c) 2020  Carnegie Mellon University
+ * Copyright (c) 2024  ALPS ALPINE CO., LTD.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,37 +20,30 @@
  * THE SOFTWARE.
  *******************************************************************************/
 
-#ifndef HEARTBEAT_H_
-#define HEARTBEAT_H_
+#ifndef ARDUINO_NODE_VIB_CONTROLLER_H
+#define ARDUINO_NODE_VIB_CONTROLLER_H
 
-#include <Arduino.h>
-#ifdef ESP32
-//#include <analogWrite.h>
-#endif
+#include <Haptic_Driver.h>
+#include <Wire.h>
+#include "SensorReader.h"
+#include "uart_com.h"
 
-class Heartbeat
-{
-  int led_pin_;
-  int delay_;
-  int status_;
+class VibController: public SensorReader {
+  static uint8_t MAX_AMP;
+  static uint16_t MAX_FREQ;
+  static uint8_t vib_power_;
+  static uint16_t vib_freq_;
+  static bool is_enabled_;
+  uart_com &cm;
 
 public:
-  Heartbeat(int led_pin, int delay)
-  : led_pin_(led_pin), delay_(delay), status_(0)
-  {
-  }
-
-  void init()
-  {
-    pinMode(led_pin_, OUTPUT);
-    analogWrite(led_pin_, 0xff);
-  }
-
-  void update()
-  {
-    status_ = status_ + 1;
-    analogWrite(led_pin_, static_cast<int>(sin(6.28 * status_ * delay_ / 1000.0) * 127 + 127));
-  }
+  VibController(cabot::Handle &ch, uart_com &cm);
+  void init();
+  void update();
+  static void vib_msg_(bool msg);
+  static void vib_power_msg_(uint8_t msg);
+  static void vib_freq_msg_(uint16_t msg);
+  static void setHapticParams(uint8_t amp, uint16_t freq, bool is_enabled);
 };
 
-#endif  // HEARTBEAT_H_
+#endif //ARDUINO_NODE_VIB_CONTROLLER_H

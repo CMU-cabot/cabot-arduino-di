@@ -1,5 +1,6 @@
 /*******************************************************************************
  * Copyright (c) 2020, 2022  Carnegie Mellon University
+ * Copyright (c) 2024  ALPS ALPINE CO.,LTD.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -123,17 +124,52 @@ void Handle::spinOnce()
       mTimeMillis = ms;
     }
   }
-  if (0x20 <= cmd && cmd <= 0x23 && count == 1) {
-    // feedback to the host
-    sendCommand(cmd, data, 1);
-    // vibration commands
-    for (int i = 0; i < 4; i++) {
+  if (cmd == 0x31 && count == 1) {
+    for (int i = 0; i < 10; i++) {
+      if (callbacks[i].cmd == cmd) {
+        callbacks[i].callback_b((bool)data[0]);
+      }
+    }
+  }
+  if (cmd == 0x32 && count == 1) {
+    for (int i = 0; i < 10; i++) {
       if (callbacks[i].cmd == cmd) {
         callbacks[i].callback(data[0]);
       }
     }
   }
+  if (cmd == 0x33 && count == 2) {
+    uint16_t value = decode_binary_16bit(data);
+    for (int i = 0; i < 10; i++) {
+      if (callbacks[i].cmd == cmd) {
+        callbacks[i].callback_ui16(value);
+      }
+    }
+  }
+  if (cmd == 0x36 && count == 2) {
+    int16_t value = decode_binary_16bit(data);
+    for (int i = 0; i < 10; i++) {
+      if (callbacks[i].cmd == cmd) {
+        callbacks[i].callback_i16(value);
+      }
+    }
+  }
+  if (cmd == 0x37 && count == 1) {
+    for (int i = 0; i < 10; i++) {
+      if (callbacks[i].cmd == cmd) {
+        callbacks[i].callback_b((bool)data[0]);
+      }
+    }
+  }
   cmd = 0;  // reset cmd
+}
+
+uint16_t Handle::decode_binary_16bit(uint8_t *ptr) {
+  uint16_t bytel = 0;
+  uint16_t byteh = 0;
+  bytel = *ptr & 0x00FF;
+  byteh = (*++ptr << 8) & 0xFF00;
+  return byteh | bytel;
 }
 
 void Handle::subscribe(uint8_t cmd, void (* callback)(const uint8_t))
@@ -141,6 +177,30 @@ void Handle::subscribe(uint8_t cmd, void (* callback)(const uint8_t))
   Callback temp;
   temp.cmd = cmd;
   temp.callback = callback;
+  callbacks[callback_count++] = temp;
+}
+
+void Handle::subscribe(uint8_t cmd, void (* callback)(const uint16_t))
+{
+  Callback temp;
+  temp.cmd = cmd;
+  temp.callback_ui16 = callback;
+  callbacks[callback_count++] = temp;
+}
+
+void Handle::subscribe(uint8_t cmd, void (* callback)(const int16_t))
+{
+  Callback temp;
+  temp.cmd = cmd;
+  temp.callback_i16 = callback;
+  callbacks[callback_count++] = temp;
+}
+
+void Handle::subscribe(uint8_t cmd, void (* callback)(const bool))
+{
+  Callback temp;
+  temp.cmd = cmd;
+  temp.callback_b = callback;
   callbacks[callback_count++] = temp;
 }
 
@@ -213,7 +273,21 @@ void Handle::publish(uint8_t cmd, int8_t data)
   sendCommand(cmd, buff, 1);
 }
 
+void Handle::publish(uint8_t cmd, uint8_t data)
+{
+  uint8_t buff[1];
+  toBytes(data, buff, 1);
+  sendCommand(cmd, buff, 1);
+}
+
 void Handle::publish(uint8_t cmd, int16_t data)
+{
+  uint8_t buff[2];
+  toBytes(data, buff, 2);
+  sendCommand(cmd, buff, 2);
+}
+
+void Handle::publish(uint8_t cmd, uint16_t data)
 {
   uint8_t buff[2];
   toBytes(data, buff, 2);
