@@ -124,38 +124,26 @@ void Handle::spinOnce()
       mTimeMillis = ms;
     }
   }
-  if (cmd == 0x31 && count == 1) {
-    for (int i = 0; i < 10; i++) {
-      if (callbacks[i].cmd == cmd) {
-        callbacks[i].callback_b((bool)data[0]);
-      }
-    }
-  }
-  if (cmd == 0x32 && count == 1) {
-    for (int i = 0; i < 10; i++) {
+  if (0x20 <= cmd && cmd <= 0x23 && count == 1) {
+    // feedback to the host
+    sendCommand(cmd, data, 1);
+    // vibration commands
+    for (int i = 0; i < CALLBACK_NUMS; i++) {
       if (callbacks[i].cmd == cmd) {
         callbacks[i].callback(data[0]);
       }
     }
   }
-  if (cmd == 0x33 && count == 2) {
-    uint16_t value = decode_binary_16bit(data);
-    for (int i = 0; i < 10; i++) {
-      if (callbacks[i].cmd == cmd) {
-        callbacks[i].callback_ui16(value);
-      }
-    }
-  }
   if (cmd == 0x36 && count == 2) {
     int16_t value = decode_binary_16bit(data);
-    for (int i = 0; i < 10; i++) {
+    for (int i = 0; i < CALLBACK_NUMS; i++) {
       if (callbacks[i].cmd == cmd) {
         callbacks[i].callback_i16(value);
       }
     }
   }
   if (cmd == 0x37 && count == 1) {
-    for (int i = 0; i < 10; i++) {
+    for (int i = 0; i < CALLBACK_NUMS; i++) {
       if (callbacks[i].cmd == cmd) {
         callbacks[i].callback_b((bool)data[0]);
       }

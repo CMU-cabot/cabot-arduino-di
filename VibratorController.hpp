@@ -1,4 +1,5 @@
 /*******************************************************************************
+ * Copyright (c) 2020, 2023  Carnegie Mellon University, IBM Corporation, and others
  * Copyright (c) 2024  ALPS ALPINE CO., LTD.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -20,30 +21,27 @@
  * THE SOFTWARE.
  *******************************************************************************/
 
-#ifndef ARDUINO_NODE_VIB_CONTROLLER_H
-#define ARDUINO_NODE_VIB_CONTROLLER_H
+#ifndef VIBRATORCONTROLLER_HPP_
+#define VIBRATORCONTROLLER_HPP_
 
-#include <Haptic_Driver.h>
 #include <Wire.h>
 #include "SensorReader.h"
-#include "uart_com.h"
+#ifdef ESP32
+#include <analogWrite.h>
+#endif
+#include "uart_com.h"  // NOLINT
 
-class VibController: public SensorReader {
-  static uint8_t MAX_AMP;
-  static uint16_t MAX_FREQ;
-  static uint8_t vib_power_;
-  static uint16_t vib_freq_;
-  static bool is_enabled_;
-  uart_com &cm;
-
+class VibratorController: public SensorReader {
+  uart_com & cm;
+  uint16_t vibrations[4];
 public:
-  VibController(cabot::Handle &ch, uart_com &cm);
+  VibratorController(cabot::Handle & ch, uart_com & cm);
   void init();
   void update();
-  static void vib_msg_(bool msg);
-  static void vib_power_msg_(uint8_t msg);
-  static void vib_freq_msg_(uint16_t msg);
-  static void setHapticParams(uint8_t amp, uint16_t freq, bool is_enabled);
+private:
+  uint8_t current_mot_c_value_;
+  uint8_t current_mot_l_value_;
+  uint8_t current_mot_r_value_;
 };
 
-#endif //ARDUINO_NODE_VIB_CONTROLLER_H
+#endif  // VIBRATORCONTROLLER_HPP_

@@ -22,68 +22,23 @@
 
 #include "ServoController.hpp"
 
-#define UART Serial1
+// keep the instance as static for callback
+ServoController * servo_inst;
 
-const int8_t EN_PIN = 15;
-const int8_t RX_PIN = 2;
-const int8_t TX_PIN = 4;
-const long BAUDRATE = 115200;
-const int TIMEOUT = 200;
-const int SERVO_DEV_ID = 0;
-int16_t ServoController::KRS_position = 0;
-
-IcsHardSerialClass krs(&UART, EN_PIN, BAUDRATE, TIMEOUT);
-
-ServoController::ServoController(cabot::Handle &ch, uart_com &cm):
-  SensorReader(ch), cm(cm)
+ServoController::ServoController(cabot::Handle &ch, uart_com &cm)
+: SensorReader(ch), 
+  cm(cm)
 {
-  ch.subscribe(0x36, [](const int16_t msg) {servo_target_msg_(msg);});
-  ch.subscribe(0x37, [](const bool msg) {servo_free_msg_(msg);});
-}
-
-int16_t ServoController::get_servo_direction(int servo_pos) {
-  int16_t direction = (float)(servo_pos - 7500) * 180 / 5000;
-
-  if (direction > 90) {
-    direction = 90;
-  } else if (direction < -90) {
-    direction = -90;
-  }
-
-  return direction;
-}
-
-void ServoController::servo_target_msg_(int16_t direction) {
-  // direction = Local_planの(終点姿勢角 - 始点姿勢角), +方向: 左回転, -方向: 右回転
-  if (direction > 90) {
-    direction = 90;
-  } else if (direction < -90) {
-    direction = -90;
-  }
-
-  int16_t servo_position = 7500 + (float)direction * 5000 / 180;
-  krs.setPos(SERVO_DEV_ID, servo_position);                                      // 3500(左) ~ 7500(中央) ~ 11500(右)
-}
-
-void ServoController::servo_free_msg_(bool free_flag) {
-  if (free_flag) {
-    krs.setFree(SERVO_DEV_ID);
-  }
+  servo_inst = this;
+  ch.subscribe(0x36, [](const int16_t msg) {servo_inst->cm.set_servo_pos(msg);});
+  ch.subscribe(0x37, [](const bool msg) {servo_inst->cm.set_servo_free(msg);});
 }
 
 void ServoController::init() {
-  UART.setPins(RX_PIN, TX_PIN);
-  krs.begin();
-
-  for (int i = 0; i < 10; i++) {
-    krs.setPos(SERVO_DEV_ID, 7500);
-    delay(50);
-  }
-
-  krs.setFree(SERVO_DEV_ID);
+  ch_.loginfo("initializing servo controller");
+  cm.set_servo_pos(0);
 }
 
 void ServoController::update() {
-  KRS_position = get_servo_direction(krs.getPos(SERVO_DEV_ID));
-  ch_.publish(0x38, (int16_t)KRS_position);
+    ch_.publish(0x38, (int16_t)cm.servo_position);
 }

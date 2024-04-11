@@ -42,8 +42,8 @@
 #include "IMUReader.hpp"
 #include "WiFiReader.hpp"
 #include "TouchReader.hpp"
+#include "VibratorController.hpp"
 #include "ServoController.hpp"
-#include "VibController.hpp"
 
 cabot::Handle ch;
 Timer < 10 > timer;
@@ -94,13 +94,13 @@ TouchReader touchReader(ch, urt_cm);
 // controllers
 // Heartbeat heartbeat(LED_BUILTIN, HEARTBEAT_DELAY);
 ServoController servoController(ch, urt_cm);
-VibController vibController(ch, urt_cm);
+VibratorController vibratorController(ch, urt_cm);
 
 void setup()
 {
   // set baud rate
   ch.setBaudRate(BAUDRATE);
-  urt_cm.begin(19200);
+  urt_cm.begin(115200);
 
   // connect to rosserial
   ch.init();
@@ -196,12 +196,12 @@ void setup()
   imuReader.init(offsets);
   ch.loginfo("setting up MPR121");
   touchReader.init(touch_baseline, touch_threshold, release_threshold);
+  ch.loginfo("setting up vibrations");
+  vibratorController.init();
   // ch.loginfo("setting up heartbeat");
   // heartbeat.init();
   ch.loginfo("setting up servoMotor");
   servoController.init();
-  ch.loginfo("setting up vibrator");
-  vibController.init();
 
   // wait sensors ready
   delay(100);
@@ -227,13 +227,13 @@ void setup()
     buttonsReader.update();
     touchReader.update();
     servoController.update();
-    vibController.update();
     return true;
   });
 
   timer.every(
     10, [] (void *) {
     imuReader.update();
+    vibratorController.update();
     return true;
   });
 

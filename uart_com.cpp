@@ -1,5 +1,6 @@
 /*******************************************************************************
  * Copyright (c) 2020, 2023  Carnegie Mellon University, IBM Corporation, and others
+ * Copyright (c) 2024  ALPS ALPINE CO., LTD.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -54,6 +55,8 @@ uart_com::uart_com(cabot::Handle & ch)
 
 void uart_com::begin(int baud_rate)
 {
+  while (!UART) {
+  }
   UART.begin(baud_rate);
 }
 
@@ -134,7 +137,7 @@ bool uart_com::parse_sensi()
 
 bool uart_com::parse_dat()
 {
-  if (words_len != 12) {return false;}
+  if (words_len != 13) {return false;}
   if (!IsDecString(words[1])) {return false;}
   if (!IsDecString(words[2])) {return false;}
   if (!IsDecString(words[3])) {return false;}
@@ -146,6 +149,7 @@ bool uart_com::parse_dat()
   if (!IsDecString(words[9])) {return false;}
   if (!IsDecString(words[10])) {return false;}
   if (!IsDecString(words[11])) {return false;}
+  if (!IsDecString(words[12])) {return false;}
 
   this->touch = DecStringToDec(words[1]);
   this->capacitance = DecStringToDec(words[2]);
@@ -158,6 +162,7 @@ bool uart_com::parse_dat()
   this->switch_left = DecStringToDec(words[9]);
   this->switch_right = DecStringToDec(words[10]);
   this->switch_center = DecStringToDec(words[11]);
+  this->servo_position = DecStringToDec(words[12]);
 
   return true;
 }
@@ -382,6 +387,7 @@ bool uart_com::set_thresh(int thresh)
     return false;
   }
 }
+
 bool uart_com::set_sensi(int sensi)
 {
   switch (sensi) {
@@ -398,6 +404,27 @@ bool uart_com::set_sensi(int sensi)
   String buf = "SENSI,";
   buf += String(sensi);
   UART.println(buf);
+  return true;
+}
+
+bool uart_com::set_servo_pos(int pos)
+{
+  if (135 >= pos && pos >= -135) {
+    String buf = "SERVO,";
+    buf += String(pos);
+    UART.println(buf);
+    return true;
+  } else {
+    return false;
+  }
+}
+
+bool uart_com::set_servo_free(bool is_free)
+{
+  if (is_free) {
+    String buf = "SERVO,-999";
+    UART.println(buf);
+  }
   return true;
 }
 
