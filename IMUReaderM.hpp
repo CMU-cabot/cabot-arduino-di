@@ -20,8 +20,8 @@
  * THE SOFTWARE.
  *******************************************************************************/
 
-#ifndef IMUReaderMM_HPP_
-#define IMUReaderMM_HPP_
+#ifndef IMUReaderM_HPP_
+#define IMUReaderM_HPP_
 
 #include <Adafruit_BNO055.h>
 #include <Adafruit_Sensor.h>
@@ -41,4 +41,4 @@ public:
   void update_calibration();
 };
 
-#endif  // IMUReaderMM_HPP_
+#endif  // IMUReaderM_HPP_

@@ -20,20 +20,20 @@
  * THE SOFTWARE.
  *******************************************************************************/
 
-#ifndef IMUREADER_HPP_
-#define IMUREADER_HPP_
+#ifndef IMUREADERI1_HPP_
+#define IMUREADERI1_HPP_
 
 #include <Adafruit_BNO055.h>
 #include <Adafruit_Sensor.h>
 #include <Wire.h>
 #include "SensorReader.h"
 
-class IMUReader: public SensorReader {
+class IMUReaderI1: public SensorReader {
   Adafruit_BNO055 imu_;
   int in_calibration_;
 
 public:
-  explicit IMUReader(cabot::Handle & ch);
+  explicit IMUReaderI1(cabot::Handle & ch);
   void calibration();
   void init();
   void init(uint8_t * offsets);
@@ -41,4 +41,4 @@ public:
   void update_calibration();
 };
 
-#endif  // IMUREADER_HPP_
+#endif  // IMUREADERI1_HPP_

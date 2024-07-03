@@ -24,21 +24,27 @@
 
 #define D2R 0.0174532925
 
-IMUReader::IMUReader(cabot::Handle & ch)
+IMUReaderI1::IMUReaderI1(cabot::Handle & ch)
 : SensorReader(ch) {}
 
-void IMUReader::calibration()
+void IMUReaderI1::calibration()
 {
   in_calibration_ = true;
   init();
 }
 
-void IMUReader::init() {init(NULL);}
+void IMUReaderI1::init() {init(NULL);}
 
-void IMUReader::init(uint8_t * offsets)
+void IMUReaderI1::init(uint8_t * offsets)
 {
   if (!imu_.begin()) {
     ch_.loginfo("Ooops, no BNO055 detected ... Check your wiring or I2C ADDR!");
+    // 26 pin required to reset BNO055 may be different.
+    pinMode(26, OUTPUT);
+    digitalWrite(26, LOW);
+    delay(100);
+    digitalWrite(26, HIGH);
+    delay(100);
     ch_.publish(0x09, (int8_t) 0x00);
     return;
   }
@@ -46,12 +52,12 @@ void IMUReader::init(uint8_t * offsets)
   if (offsets != NULL) {
     imu_.setSensorOffsets(offsets);
   }
-  // imu_.setAxisRemap(Adafruit_BNO055::REMAP_CONFIG_P6);
-  // imu_.setAxisSign(Adafruit_BNO055::REMAP_SIGN_P6);
+  imu_.setAxisRemap(Adafruit_BNO055::REMAP_CONFIG_P6);
+  imu_.setAxisSign(Adafruit_BNO055::REMAP_SIGN_P6);
   imu_.setExtCrystalUse(true);
 }
 
-void IMUReader::update()
+void IMUReaderI1::update()
 {
   if (!initialized_) {
     return;
@@ -87,7 +93,7 @@ void IMUReader::update()
   ch_.publish(0x13, data, 12);
 }
 
-void IMUReader::update_calibration()
+void IMUReaderI1::update_calibration()
 {
   if (!initialized_) {
     return;
