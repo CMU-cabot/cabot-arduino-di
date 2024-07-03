@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2023  Carnegie Mellon University and Miraikan
+ * Copyright (c) 2020, 2024  Carnegie Mellon University and Miraikan
  * Copyright (c) 2024  ALPS ALPINE CO.,LTD.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -39,7 +39,12 @@
 #include "BarometerReader.hpp"
 #include "ButtonsReader.hpp"
 // #include "Heartbeat.h"
-#include "IMUReader.hpp"
+#ifdef I1
+#include "IMUReaderI1.hpp"
+#else
+#include "IMUReaderM.hpp"
+#endif
+
 #include "WiFiReader.hpp"
 #include "TouchReader.hpp"
 #include "VibratorController.hpp"
@@ -87,7 +92,11 @@ uart_com urt_cm(ch);
 // sensors
 BarometerReader bmpReader(ch);
 ButtonsReader buttonsReader(ch, urt_cm);
-IMUReader imuReader(ch);
+#ifdef I1
+IMUReaderI1 imuReader(ch);
+#else
+IMUReaderM imuReader(ch);
+#endif
 WiFiReader wifiReader(ch);
 TouchReader touchReader(ch, urt_cm);
 

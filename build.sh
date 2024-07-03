@@ -17,7 +17,7 @@ function help() {
     echo "-h         show this help"
     echo "-b         set board (default=esp32:esp32:esp32)"
     echo "-p         set port (default=/dev/ttyESP32)"
-    echo "-m <mode> set mode (I1/M1/M2) **REQUIRED** to set"
+    echo "-m <mode>  set mode (I1/M1/M2) **REQUIRED** to set"
 }
 
 : ${ARDUINO_BOARD:="esp32:esp32:esp32"}
@@ -54,9 +54,8 @@ fi
 
 function build() {
     echo "building for $board, $mode..."
-    echo "arduino-cli compile -b $board --build-property build.extra_flags=-D$mode ."
-    arduino-cli compile -b $board --build-property build.extra_flags=-D$mode .
-
+    echo "arduino-cli compile -b $board --build-property compiler.cpp.extra_flags=-D$mode ."
+    arduino-cli compile -b $board --build-property compiler.cpp.extra_flags=-D$mode .
     if [ $? -ne 0 ]; then
         err "Please check mode ($mode)"
     fi
