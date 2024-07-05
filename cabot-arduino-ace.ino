@@ -39,12 +39,7 @@
 #include "BarometerReader.hpp"
 #include "ButtonsReader.hpp"
 // #include "Heartbeat.h"
-#ifdef I1
-#include "IMUReaderI1.hpp"
-#else
-#include "IMUReaderM.hpp"
-#endif
-
+#include "IMUReader.hpp"
 #include "WiFiReader.hpp"
 #include "TouchReader.hpp"
 #include "VibratorController.hpp"
@@ -92,11 +87,7 @@ uart_com urt_cm(ch);
 // sensors
 BarometerReader bmpReader(ch);
 ButtonsReader buttonsReader(ch, urt_cm);
-#ifdef I1
-IMUReaderI1 imuReader(ch);
-#else
-IMUReaderM imuReader(ch);
-#endif
+IMUReader imuReader(ch);
 WiFiReader wifiReader(ch);
 TouchReader touchReader(ch, urt_cm);
 

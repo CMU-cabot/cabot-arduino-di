@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2024  Carnegie Mellon University and Miraikan
+ * Copyright (c) 2020, 2023  Carnegie Mellon University and Miraikan
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,20 +20,20 @@
  * THE SOFTWARE.
  *******************************************************************************/
 
-#ifndef IMUREADERI1_HPP_
-#define IMUREADERI1_HPP_
+#ifndef IMUREADER_HPP_
+#define IMUREADER_HPP_
 
 #include <Adafruit_BNO055.h>
 #include <Adafruit_Sensor.h>
 #include <Wire.h>
 #include "SensorReader.h"
 
-class IMUReaderI1: public SensorReader {
+class IMUReader: public SensorReader {
   Adafruit_BNO055 imu_;
   int in_calibration_;
 
 public:
-  explicit IMUReaderI1(cabot::Handle & ch);
+  explicit IMUReader(cabot::Handle & ch);
   void calibration();
   void init();
   void init(uint8_t * offsets);
@@ -41,4 +41,4 @@ public:
   void update_calibration();
 };
 
-#endif  // IMUREADERI1_HPP_
+#endif  // IMUREADER_HPP_

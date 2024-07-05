@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2024  Carnegie Mellon University and Miraikan
+ * Copyright (c) 2020, 2023, 2024  Carnegie Mellon University and Miraikan
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,31 +20,34 @@
  * THE SOFTWARE.
  *******************************************************************************/
 
-#include "IMUReaderI1.hpp"  // NOLINT
+#include "IMUReader.hpp"  // NOLINT
 
 #define D2R 0.0174532925
 
-IMUReaderI1::IMUReaderI1(cabot::Handle & ch)
+IMUReader::IMUReader(cabot::Handle & ch)
 : SensorReader(ch) {}
 
-void IMUReaderI1::calibration()
+void IMUReader::calibration()
 {
   in_calibration_ = true;
   init();
 }
 
-void IMUReaderI1::init() {init(NULL);}
+void IMUReader::init() {init(NULL);}
 
-void IMUReaderI1::init(uint8_t * offsets)
+void IMUReader::init(uint8_t * offsets)
 {
   if (!imu_.begin()) {
     ch_.loginfo("Ooops, no BNO055 detected ... Check your wiring or I2C ADDR!");
+#ifdef I1
     // 26 pin required to reset BNO055 may be different.
     pinMode(26, OUTPUT);
     digitalWrite(26, LOW);
     delay(100);
     digitalWrite(26, HIGH);
     delay(100);
+#else
+#endif
     ch_.publish(0x09, (int8_t) 0x00);
     return;
   }
@@ -52,12 +55,15 @@ void IMUReaderI1::init(uint8_t * offsets)
   if (offsets != NULL) {
     imu_.setSensorOffsets(offsets);
   }
+#ifdef I1
   imu_.setAxisRemap(Adafruit_BNO055::REMAP_CONFIG_P6);
   imu_.setAxisSign(Adafruit_BNO055::REMAP_SIGN_P6);
+#else
+#endif
   imu_.setExtCrystalUse(true);
 }
 
-void IMUReaderI1::update()
+void IMUReader::update()
 {
   if (!initialized_) {
     return;
@@ -93,7 +99,7 @@ void IMUReaderI1::update()
   ch_.publish(0x13, data, 12);
 }
 
-void IMUReaderI1::update_calibration()
+void IMUReader::update_calibration()
 {
   if (!initialized_) {
     return;
