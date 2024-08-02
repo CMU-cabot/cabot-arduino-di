@@ -30,7 +30,21 @@ VibratorController::VibratorController(cabot::Handle & ch, uart_com & cm)
   cm(cm)
 {
   inst = this;
-  ch.subscribe(0x20, [](const uint8_t msg) {inst->vibrations[0] = msg+1;});
+  ch.subscribe(
+    0x20, [](const uint8_t msg) {
+      inst->ch_.loginfo("setting vibrator1");
+      String buf = "setting vibrator1,";
+      buf += String(msg);
+      buf += ",";
+      buf += String(inst->cm.motor_r);
+      buf += ",";
+      buf += String(inst->cm.motor_c);
+      buf += ",";
+      buf += String(inst->cm.motor_l);
+
+      inst->ch_.loginfo(const_cast<char *>(buf.c_str()));
+      inst->vibrations[0] = msg+1;
+    });
   ch.subscribe(0x21, [](const uint8_t msg) { /* nop: not supported */});
   ch.subscribe(0x22, [](const uint8_t msg) {inst->vibrations[2] = msg+1;});
   ch.subscribe(0x23, [](const uint8_t msg) {inst->vibrations[3] = msg+1;});
@@ -40,9 +54,6 @@ void VibratorController::init()
 {
   ch_.loginfo("initializing vibrator controller");
   cm.set_mot(0, 0, 0);
-  current_mot_c_value_ = 0;
-  current_mot_l_value_ = 0;
-  current_mot_r_value_ = 0;
 }
 
 void VibratorController::update()
@@ -53,25 +64,19 @@ void VibratorController::update()
         vibrations[i] = 0;
         if (i == 0) {
           cm.set_mot_c(0);
-          current_mot_c_value_ = 0;
         } else if (i == 2) {
           cm.set_mot_l(0);
-          current_mot_l_value_ = 0;
         } else if (i == 3) {
           cm.set_mot_r(0);
-          current_mot_r_value_ = 0;
         }
       } else {
         vibrations[i]--;
-        if (i == 0 && current_mot_c_value_ == 0) {
+        if (i == 0){
           cm.set_mot_c(100);
-          current_mot_c_value_ = 100;
-        } else if (i == 2 && current_mot_l_value_ == 0) {
+        } else if (i == 2) {
           cm.set_mot_l(100);
-          current_mot_l_value_ = 100;
-        } else if (i == 3 && current_mot_r_value_ == 0) {
+        } else if (i == 3) {
           cm.set_mot_r(100);
-          current_mot_r_value_ = 100;
         }
       }
     }
