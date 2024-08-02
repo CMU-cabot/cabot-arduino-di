@@ -17,7 +17,7 @@ function help() {
     echo "-h         show this help"
     echo "-b         set board (default=esp32:esp32:esp32)"
     echo "-p         set port (default=/dev/ttyESP32)"
-    echo "-m <mode>  set mode (I1/M1/M2) **REQUIRED** to set"
+    echo "-m <mode>  set mode (ACE/I1/M1/M2) **REQUIRED** to set"
 }
 
 : ${ARDUINO_BOARD:="esp32:esp32:esp32"}

@@ -34,6 +34,7 @@ class BarometerReader: public SensorReader {
 public:
   explicit BarometerReader(cabot::Handle & ch);
   void init();
+  void init(uint8_t i2c_addr);
   void update();
 };
 

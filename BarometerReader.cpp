@@ -25,10 +25,12 @@
 BarometerReader::BarometerReader(cabot::Handle & ch)
 : SensorReader(ch) {}
 
-void BarometerReader::init()
+void BarometerReader::init() {init(NULL);}
+
+void BarometerReader::init(uint8_t i2c_addr)
 {
   Wire.begin(21, 22);
-  if (!bme_.begin(0x77, &Wire)) {
+  if (!bme_.begin(i2c_addr, &Wire)) {
     ch_.loginfo("Ooops, no BME280 detected ... Check your wiring or I2C ADDR!");
     ch_.publish(0x09, (int8_t) 0x00);
     return;

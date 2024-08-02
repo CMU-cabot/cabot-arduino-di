@@ -190,7 +190,11 @@ void setup()
   ch.loginfo("starting uart com");
   urt_cm.start();
   ch.loginfo("setting up BMP280");
-  bmpReader.init();
+  #if defined(I1) || defined(M1) || defined(M2)
+  bmpReader.init(0x77);
+  #else
+  bmpReader.init(0x76);
+  #endif
   ch.loginfo("setting up Buttons");
   buttonsReader.init();
   ch.loginfo("setting up BNO055");

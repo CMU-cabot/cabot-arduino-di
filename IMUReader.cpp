@@ -39,7 +39,7 @@ void IMUReader::init(uint8_t * offsets)
 {
   if (!imu_.begin()) {
     ch_.loginfo("Ooops, no BNO055 detected ... Check your wiring or I2C ADDR!");
-#ifdef I1
+#if defined(ACE) || defined(I1)
     // 26 pin required to reset BNO055 may be different.
     pinMode(26, OUTPUT);
     digitalWrite(26, LOW);
@@ -55,7 +55,7 @@ void IMUReader::init(uint8_t * offsets)
   if (offsets != NULL) {
     imu_.setSensorOffsets(offsets);
   }
-#ifdef I1
+#if defined(ACE) || defined(I1)
   imu_.setAxisRemap(Adafruit_BNO055::REMAP_CONFIG_P6);
   imu_.setAxisSign(Adafruit_BNO055::REMAP_SIGN_P6);
 #else
