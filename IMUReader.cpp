@@ -46,7 +46,6 @@ void IMUReader::init(uint8_t * offsets)
     delay(100);
     digitalWrite(26, HIGH);
     delay(100);
-#else
 #endif
     ch_.publish(0x09, (int8_t) 0x00);
     return;
@@ -58,7 +57,6 @@ void IMUReader::init(uint8_t * offsets)
 #if defined(ACE) || defined(I1)
   imu_.setAxisRemap(Adafruit_BNO055::REMAP_CONFIG_P6);
   imu_.setAxisSign(Adafruit_BNO055::REMAP_SIGN_P6);
-#else
 #endif
   imu_.setExtCrystalUse(true);
 }
