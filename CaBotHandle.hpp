@@ -98,7 +98,8 @@ private:
     uint8_t size_count = 0;
     uint8_t cmd = 0;
     uint8_t count = 0;
-    Callback callbacks[10];
+    static constexpr uint8_t CALLBACK_NUMS = 10;
+    Callback callbacks[CALLBACK_NUMS];
     size_t callback_count = 0;
   };
 }  // namespace cabot

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2023  Carnegie Mellon University and Miraikan
+ * Copyright (c) 2020, 2024  Carnegie Mellon University and Miraikan
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -39,12 +39,14 @@ void IMUReader::init(uint8_t * offsets)
 {
   if (!imu_.begin()) {
     ch_.loginfo("Ooops, no BNO055 detected ... Check your wiring or I2C ADDR!");
+#if defined(ACE) || defined(I1)
     // 26 pin required to reset BNO055 may be different.
     pinMode(26, OUTPUT);
     digitalWrite(26, LOW);
     delay(100);
     digitalWrite(26, HIGH);
     delay(100);
+#endif
     ch_.publish(0x09, (int8_t) 0x00);
     return;
   }
@@ -52,8 +54,10 @@ void IMUReader::init(uint8_t * offsets)
   if (offsets != NULL) {
     imu_.setSensorOffsets(offsets);
   }
+#if defined(ACE) || defined(I1)
   imu_.setAxisRemap(Adafruit_BNO055::REMAP_CONFIG_P6);
   imu_.setAxisSign(Adafruit_BNO055::REMAP_SIGN_P6);
+#endif
   imu_.setExtCrystalUse(true);
 }
 

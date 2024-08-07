@@ -20,25 +20,20 @@
  * THE SOFTWARE.
  *******************************************************************************/
 
-#ifndef ARDUINO_NODE_SERVO_CONTROLLER_H
-#define ARDUINO_NODE_SERVO_CONTROLLER_H
+#ifndef ARDUINO_NODE_SERVO_CONTROLLER_HPP
+#define ARDUINO_NODE_SERVO_CONTROLLER_HPP
 
-#include <IcsHardSerialClass.h>
 #include <Wire.h>
 #include "SensorReader.h"
 #include "uart_com.h"  // NOLINT
 
 class ServoController: public SensorReader {
-  static int16_t KRS_position;
   uart_com &cm;
 
 public:
   ServoController(cabot::Handle &ch, uart_com &cm);
   void init();
   void update();
-  static int16_t get_servo_direction(int servo_pos);
-  static void servo_target_msg_(int16_t msg);
-  static void servo_free_msg_(bool msg);
 };
 
-#endif //ARDUINO_NODE_SERVO_CONTROLLER_H
+#endif //ARDUINO_NODE_SERVO_CONTROLLER_HPP

@@ -1,5 +1,6 @@
 /*******************************************************************************
  * Copyright (c) 2020, 2023  Carnegie Mellon University, IBM Corporation, and others
+ * Copyright (c) 2024  ALPS ALPINE CO., LTD.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,6 +23,8 @@
 #include "uart_com.h"  // NOLINT
 #include "Arduino.h"
 #include "stdlib.h"  // NOLINT
+#include "ctime"
+#include "cstdlib"
 
 #define UART Serial2
 
@@ -54,6 +57,8 @@ uart_com::uart_com(cabot::Handle & ch)
 
 void uart_com::begin(int baud_rate)
 {
+  while (!UART) {
+  }
   UART.begin(baud_rate);
 }
 
@@ -134,7 +139,7 @@ bool uart_com::parse_sensi()
 
 bool uart_com::parse_dat()
 {
-  if (words_len != 12) {return false;}
+  if (words_len != 13) {return false;}
   if (!IsDecString(words[1])) {return false;}
   if (!IsDecString(words[2])) {return false;}
   if (!IsDecString(words[3])) {return false;}
@@ -146,6 +151,7 @@ bool uart_com::parse_dat()
   if (!IsDecString(words[9])) {return false;}
   if (!IsDecString(words[10])) {return false;}
   if (!IsDecString(words[11])) {return false;}
+  if (!IsDecString(words[12])) {return false;}
 
   this->touch = DecStringToDec(words[1]);
   this->capacitance = DecStringToDec(words[2]);
@@ -158,6 +164,7 @@ bool uart_com::parse_dat()
   this->switch_left = DecStringToDec(words[9]);
   this->switch_right = DecStringToDec(words[10]);
   this->switch_center = DecStringToDec(words[11]);
+  this->servo_position = DecStringToDec(words[12]);
 
   return true;
 }
@@ -307,6 +314,7 @@ void uart_com::update()
     char c = UART.read();
     this->StringCmdParse(c);
   }
+  check_feedback();
 }
 
 void uart_com::start()
@@ -326,6 +334,9 @@ bool uart_com::set_mot(int right, int center, int left)
     buf += String(center) + ",";
     buf += String(left);
     UART.println(buf);
+    expected_motor_r = right;
+    expected_motor_c = center;
+    expected_motor_l = left;
     return true;
   } else {
     return false;
@@ -339,6 +350,7 @@ bool uart_com::set_mot_r(int val)
     String buf = "R,";
     buf += String(val);
     UART.println(buf);
+    expected_motor_r = val;
     return true;
   } else {
     return false;
@@ -352,6 +364,7 @@ bool uart_com::set_mot_c(int val)
     String buf = "C,";
     buf += String(val);
     UART.println(buf);
+    expected_motor_c = val;
     return true;
   } else {
     return false;
@@ -365,6 +378,7 @@ bool uart_com::set_mot_l(int val)
     String buf = "L,";
     buf += String(val);
     UART.println(buf);
+    expected_motor_l = val;
     return true;
   } else {
     return false;
@@ -382,6 +396,7 @@ bool uart_com::set_thresh(int thresh)
     return false;
   }
 }
+
 bool uart_com::set_sensi(int sensi)
 {
   switch (sensi) {
@@ -401,6 +416,27 @@ bool uart_com::set_sensi(int sensi)
   return true;
 }
 
+bool uart_com::set_servo_pos(int pos)
+{
+  if (135 >= pos && pos >= -135) {
+    String buf = "SERVO,";
+    buf += String(pos);
+    UART.println(buf);
+    return true;
+  } else {
+    return false;
+  }
+}
+
+bool uart_com::set_servo_free(bool is_free)
+{
+  if (is_free) {
+    String buf = "SERVO,-999";
+    UART.println(buf);
+  }
+  return true;
+}
+
 bool uart_com::is_started()
 {
   return this->_started;
@@ -415,3 +451,32 @@ bool uart_com::is_alive()
 void uart_com::publish()
 {
 }
+
+void uart_com::check_feedback()
+{
+  if (this->motor_r != expected_motor_r) {
+    resync_r++;
+    String logmsg = "expected motor_r (" + String(this->motor_r) + " != " + String(expected_motor_r) + ") [count=" + String(resync_r) + "]";
+    ch_.loginfo(logmsg.c_str());
+    set_mot_r(expected_motor_r);
+  } else {
+    resync_r = 0;
+  }
+  if (this->motor_c != expected_motor_c) {
+    resync_c++;
+    String logmsg = "expected motor_c (" + String(this->motor_c) + " != " + String(expected_motor_c) + ") [count=" + String(resync_c) + "]";
+    ch_.loginfo(logmsg.c_str());
+    set_mot_c(expected_motor_c);
+  } else {
+    resync_c = 0;
+  }
+  if (this->motor_l != expected_motor_l) {
+    resync_l++;
+    String logmsg = "expected motor_l (" + String(this->motor_l) + " != " + String(expected_motor_l) + ") [count=" + String(resync_l) + "]";
+    ch_.loginfo(logmsg.c_str());
+    set_mot_l(expected_motor_l);
+  } else {
+    resync_l = 0;
+  }
+}
+

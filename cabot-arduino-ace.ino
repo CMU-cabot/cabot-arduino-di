@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2023  Carnegie Mellon University and Miraikan
+ * Copyright (c) 2020, 2024  Carnegie Mellon University and Miraikan
  * Copyright (c) 2024  ALPS ALPINE CO.,LTD.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -42,10 +42,11 @@
 #include "IMUReader.hpp"
 #include "WiFiReader.hpp"
 #include "TouchReader.hpp"
+#include "VibratorController.hpp"
 #include "ServoController.hpp"
-#include "VibController.hpp"
 
 cabot::Handle ch;
+uart_com uart(ch);
 Timer < 10 > timer;
 
 // configurations
@@ -94,13 +95,13 @@ TouchReader touchReader(ch, urt_cm);
 // controllers
 // Heartbeat heartbeat(LED_BUILTIN, HEARTBEAT_DELAY);
 ServoController servoController(ch, urt_cm);
-VibController vibController(ch, urt_cm);
+VibratorController vibratorController(ch, urt_cm);
 
 void setup()
 {
   // set baud rate
   ch.setBaudRate(BAUDRATE);
-  urt_cm.begin(19200);
+  urt_cm.begin(115200);
 
   // connect to rosserial
   ch.init();
@@ -189,19 +190,23 @@ void setup()
   ch.loginfo("starting uart com");
   urt_cm.start();
   ch.loginfo("setting up BMP280");
-  bmpReader.init();
+  #if defined(I1) || defined(M1) || defined(M2)
+  bmpReader.init(0x77);
+  #else
+  bmpReader.init(0x76);
+  #endif
   ch.loginfo("setting up Buttons");
   buttonsReader.init();
   ch.loginfo("setting up BNO055");
   imuReader.init(offsets);
   ch.loginfo("setting up MPR121");
   touchReader.init(touch_baseline, touch_threshold, release_threshold);
+  ch.loginfo("setting up vibrations");
+  vibratorController.init();
   // ch.loginfo("setting up heartbeat");
   // heartbeat.init();
   ch.loginfo("setting up servoMotor");
   servoController.init();
-  ch.loginfo("setting up vibrator");
-  vibController.init();
 
   // wait sensors ready
   delay(100);
@@ -227,13 +232,13 @@ void setup()
     buttonsReader.update();
     touchReader.update();
     servoController.update();
-    vibController.update();
     return true;
   });
 
   timer.every(
     10, [] (void *) {
     imuReader.update();
+    vibratorController.update();
     return true;
   });
 

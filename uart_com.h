@@ -1,5 +1,6 @@
 /*******************************************************************************
  * Copyright (c) 2020, 2023  Carnegie Mellon University, IBM Corporation, and others
+ * Copyright (c) 2024  ALPS ALPINE CO., LTD.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -59,11 +60,18 @@ public:
   int motor_r;
   int motor_c;
   int motor_l;
+  int expected_motor_r;
+  int expected_motor_c;
+  int expected_motor_l;
+  int resync_r;
+  int resync_c;
+  int resync_l;
   int switch_up;
   int switch_down;
   int switch_left;
   int switch_right;
   int switch_center;
+  int servo_position;
   int error_count;
   explicit uart_com(cabot::Handle & ch);
   void init();
@@ -79,7 +87,10 @@ public:
   bool set_mot_l(int val);
   bool set_thresh(int thresh);
   bool set_sensi(int sensi);
+  bool set_servo_pos(int pos);
+  bool set_servo_free(bool is_free);
   void publish();
+  void check_feedback();
 };
 
 #endif  // UART_COM_H_
