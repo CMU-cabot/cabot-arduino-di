@@ -50,12 +50,12 @@ One example of hardware components
   host $ docker-compose run arduino
 docker $ ./build.sh -m <mode> all      # build and upload (with -b esp32:esp32:esp32 -p /dev/ttyESP32 -m <mode>)
                                        # you can set board by ARDUINO_BOARD, and port by ARDUINO_PORT environment variables
-                                       # mode should be specified (I1/M1/M2)
+                                       # mode should be specified (ACE/I1/M1/M2)
                                        # ex.
                                        # ./build.sh -m M2 all
 
 or use arduino-cli
-docker $ arduino-cli compile -b esp32:esp32:esp32 --build-property compiler.cpp.extra_flags=-D<mode> .  # mode should be specified (I1/M1/M2)
+docker $ arduino-cli compile -b esp32:esp32:esp32 --build-property compiler.cpp.extra_flags=-D<mode> .  # mode should be specified (ACE/I1/M1/M2)
                                                                                                         # ex:
                                                                                                         # arduino-cli compile -b esp32:esp32:esp32 --build-property compiler.cpp.extra_flags=-DM2 .
 
