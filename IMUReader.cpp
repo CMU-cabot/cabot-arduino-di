@@ -39,7 +39,7 @@ void IMUReader::init(uint8_t * offsets)
 {
   if (!imu_.begin()) {
     ch_.loginfo("Ooops, no BNO055 detected ... Check your wiring or I2C ADDR!");
-#if defined(ACE) || defined(I1)
+#if defined(ACE) || defined(I1) || defined(M2)
     // 26 pin required to reset BNO055 may be different.
     pinMode(26, OUTPUT);
     digitalWrite(26, LOW);
