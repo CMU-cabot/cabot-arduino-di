@@ -355,7 +355,7 @@ int32_t Handle::timeDiff(Time a, Time b)
 size_t Handle::readCommand(uint8_t * expect, uint8_t ** ptr)
 {
   static int DATA_MAX_SIZE_BYTE = 1;
-  static uint8_t buffer[16];
+  static uint8_t buffer[256];
   static char buff[48];
 
   if (Serial.available() == 0) {
